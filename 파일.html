@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>비밀</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .add-btn:active {
+            transform: scale(0.95);
+        }
+
+        .search-box {
+            background: #2a2a2a;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 15px;
+            width: 100%;
+            color: #ffffff;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .search-box::placeholder {
+            color: #888;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 50px 2fr 2fr 2fr;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 50px 2fr 2fr 2fr;
+            padding: 15px 10px;
+            background: #252525;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .table-row:hover {
+            background: #2d2d2d;
+            transform: translateX(5px);
+        }
+
+        .table-row:active {
+            transform: scale(0.98);
+        }
+
+        .row-number {
+            color: #666;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .row-content {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 0 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2a2a2a;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 32px;
+            cursor: pointer;
+            padding: 0;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: white;
+        }
+
+        .btn-save:hover {
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-cancel {
+            background: #3a3a3a;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #4a4a4a;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border-top: 1px solid #2a2a2a;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            padding: 10px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: #d946ef;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 600px) {
+            .table-header,
+            .table-row {
+                font-size: 13px;
+            }
+
+            .row-content {
+                padding: 0 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>비밀</h1>
+        <button class="add-btn" onclick="openAddModal()">
+            <span>+</span> Add
+        </button>
+    </div>
+
+    <input type="text" class="search-box" placeholder="🔍 검색" id="searchInput" oninput="searchPasswords()">
+
+    <div class="table-header">
+        <div></div>
+        <div>발란 이름</div>
+        <div>비밀</div>
+        <div>주소</div>
+    </div>
+
+    <div id="passwordList"></div>
+
+    <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-state-icon">🔒</div>
+        <p>저장된 비밀번호가 없습니다</p>
+        <p style="margin-top: 10px; font-size: 14px;">+ Add 버튼을 눌러 추가하세요</p>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">새 항목 추가</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <form id="passwordForm" onsubmit="savePassword(event)">
+                <div class="form-group">
+                    <label>발란 이름</label>
+                    <input type="text" id="itemName" required>
+                </div>
+                <div class="form-group">
+                    <label>비밀</label>
+                    <input type="text" id="itemPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>주소</label>
+                    <input type="text" id="itemAddress" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">취소</button>
+                    <button type="button" class="btn btn-delete" id="deleteBtn" onclick="deletePassword()" style="display: none;">삭제</button>
+                    <button type="submit" class="btn btn-save">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item">
+            <div class="nav-icon">👤</div>
+            <div>Users</div>
+        </div>
+        <div class="nav-item active">
+            <div class="nav-icon">🔒</div>
+            <div>비밀</div>
+        </div>
+    </div>
+
+    <script>
+        let passwords = [];
+        let editingIndex = -1;
+
+        // Load data from localStorage
+        function loadPasswords() {
+            const saved = localStorage.getItem('passwords');
+            if (saved) {
+                passwords = JSON.parse(saved);
+            } else {
+                // Sample data
+                passwords = [
+                    { name: 'west51', password: '중3572', address: '서부2길 14-2' },
+                    { name: '가온아트빌', password: '#2157#', address: '동항교1길 27-16' },
+                    { name: '강병파크빌', password: '405#1234#t', address: '남천로 174' },
+                    { name: '겔러시 진', password: '중1223', address: '동항교1길 16-8' },
+                    { name: '경동빌', password: '#2016#', address: '동항교1길 16-17' },
+                    { name: '경은하우스', password: '#1001#', address: '발산3길 11' },
+                    { name: '골든베스트', password: '중7247', address: '남상평2길 35' },
+                    { name: '글렛마을', password: '#6565#', address: '동부1길 26-3' },
+                    { name: '나이스빌', password: '#1907#', address: '북문8길 16' },
+                    { name: '노블워우스', password: '중3142', address: '우암천3길 3' },
+                    { name: '녹원캐슬', password: '#2358#', address: '북문8길 64' },
+                    { name: '다드림', password: '#7981#', address: '동항교2길 9' },
+                    { name: '다송원룸', password: '중2536', address: '발산3길 11-10' },
+                    { name: '다인빌리지', password: '#6745#', address: '서항교1길 27-10' }
+                ];
+                saveToStorage();
+            }
+            renderPasswords();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('passwords', JSON.stringify(passwords));
+        }
+
+        function renderPasswords(filteredData = null) {
+            const data = filteredData || passwords;
+            const listDiv = document.getElementById('passwordList');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (data.length === 0) {
+                listDiv.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            listDiv.innerHTML = data.map((item, index) => `
+                <div class="table-row" onclick="openEditModal(${passwords.indexOf(item)})">
+                    <div class="row-number">${passwords.indexOf(item) + 1}</div>
+                    <div class="row-content">${item.name}</div>
+                    <div class="row-content">${item.password}</div>
+                    <div class="row-content">${item.address}</div>
+                </div>
+            `).join('');
+        }
+
+        function searchPasswords() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm === '') {
+                renderPasswords();
+                return;
+            }
+
+            const filtered = passwords.filter(item => 
+                item.name.toLowerCase().includes(searchTerm) ||
+                item.password.toLowerCase().includes(searchTerm) ||
+                item.address.toLowerCase().includes(searchTerm)
+            );
+            renderPasswords(filtered);
+        }
+
+        function openAddModal() {
+            editingIndex = -1;
+            document.getElementById('modalTitle').textContent = '새 항목 추가';
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemPassword').value = '';
+            document.getElementById('itemAddress').value = '';
+            document.getElementById('deleteBtn').style.display = 'none';
+            document.getElementById('passwordModal').classList.add('active');
+        }
+
+        function openEditModal(index) {
+            editingIndex = index;
+            const item = passwords[index];
+            document.getElementById('modalTitle').textContent = '항목 수정';
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemPassword').value = item.password;
+            document.getElementById('itemAddress').value = item.address;
+            document.getElementById('deleteBtn').style.display = 'block';
+            document.getElementById('passwordModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+        }
+
+        function savePassword(event) {
+            event.preventDefault();
+            
+            const newItem = {
+                name: document.getElementById('itemName').value,
+                password: document.getElementById('itemPassword').value,
+                address: document.getElementById('itemAddress').value
+            };
+
+            if (editingIndex === -1) {
+                passwords.push(newItem);
+            } else {
+                passwords[editingIndex] = newItem;
+            }
+
+            saveToStorage();
+            renderPasswords();
+            closeModal();
+        }
+
+        function deletePassword() {
+            if (editingIndex !== -1 && confirm('정말 삭제하시겠습니까?')) {
+                passwords.splice(editingIndex, 1);
+                saveToStorage();
+                renderPasswords();
+                closeModal();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        loadPasswords();
+    </script>
+</body>
+</html>
