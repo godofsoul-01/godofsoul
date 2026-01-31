@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>비밀</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        /* 로그인 화면 스타일 */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: #2a2a2a;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .login-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .login-subtitle {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .login-form {
+            margin-top: 30px;
+        }
+
+        .login-form-group {
+            margin-bottom: 20px;
+        }
+
+        .login-form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .login-form-group input {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .login-form-group input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        .error-message {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid #dc2626;
+            color: #fca5a5;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* 메인 앱 화면 */
+        .main-app {
+            display: none;
+        }
+
+        .main-app.active {
+            display: block;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-btn, .logout-btn, .admin-btn {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .logout-btn {
+            background: #3a3a3a;
+            box-shadow: none;
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+
+        .admin-btn {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+
+        .add-btn:hover, .logout-btn:hover, .admin-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .add-btn:active, .logout-btn:active, .admin-btn:active {
+            transform: scale(0.95);
+        }
+
+        .search-box {
+            background: #2a2a2a;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 15px;
+            width: 100%;
+            color: #ffffff;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .search-box::placeholder {
+            color: #888;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 50px 2fr 2fr 2fr;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 50px 2fr 2fr 2fr;
+            padding: 15px 10px;
+            background: #252525;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .table-row.clickable {
+            cursor: pointer;
+        }
+
+        .table-row.clickable:hover {
+            background: #2d2d2d;
+            transform: translateX(5px);
+        }
+
+        .table-row.clickable:active {
+            transform: scale(0.98);
+        }
+
+        .table-row.view-only {
+            cursor: default;
+        }
+
+        .row-number {
+            color: #666;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .row-content {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 0 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2a2a2a;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 32px;
+            cursor: pointer;
+            padding: 0;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .form-group input:disabled {
+            background: #2a2a2a;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: white;
+        }
+
+        .btn-save:hover {
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-cancel {
+            background: #3a3a3a;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #4a4a4a;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border-top: 1px solid #2a2a2a;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            padding: 10px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: #d946ef;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .user-list {
+            margin-top: 20px;
+        }
+
+        .user-item {
+            background: #252525;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .user-password {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .delete-user-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .permission-notice {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid #eab308;
+            color: #fde047;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 600px) {
+            .table-header,
+            .table-row {
+                font-size: 13px;
+            }
+
+            .row-content {
+                padding: 0 3px;
+            }
+
+            .header-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .add-btn, .logout-btn, .admin-btn {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 로그인 화면 -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="login-icon">🔒</div>
+                <h1>비밀</h1>
+                <p class="login-subtitle">비밀번호를 입력하세요</p>
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                비밀번호가 올바르지 않습니다
+            </div>
+
+            <form class="login-form" onsubmit="login(event)">
+                <div class="login-form-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="loginPassword" placeholder="비밀번호 입력" required autofocus>
+                </div>
+                <button type="submit" class="login-btn">로그인</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 메인 앱 화면 -->
+    <div class="main-app" id="mainApp">
+        <div class="header">
+            <h1>비밀</h1>
+            <div class="header-buttons">
+                <button class="admin-btn" id="adminBtn" onclick="openAdminPanel()" style="display: none;">
+                    ⚙️ 관리
+                </button>
+                <button class="add-btn" onclick="openAddModal()">
+                    <span>+</span> Add
+                </button>
+                <button class="logout-btn" onclick="logout()">
+                    🚪 로그아웃
+                </button>
+            </div>
+        </div>
+
+        <div class="permission-notice" id="permissionNotice" style="display: none;">
+            ℹ️ 일반 사용자는 항목 추가만 가능합니다. 수정/삭제는 관리자만 가능합니다.
+        </div>
+
+        <input type="text" class="search-box" placeholder="🔍 검색" id="searchInput" oninput="searchPasswords()">
+
+        <div class="table-header">
+            <div></div>
+            <div>발란 이름</div>
+            <div>비밀</div>
+            <div>주소</div>
+        </div>
+
+        <div id="passwordList"></div>
+
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">🔒</div>
+            <p>저장된 비밀번호가 없습니다</p>
+            <p style="margin-top: 10px; font-size: 14px;">+ Add 버튼을 눌러 추가하세요</p>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item">
+                <div class="nav-icon">👤</div>
+                <div>Users</div>
+            </div>
+            <div class="nav-item active">
+                <div class="nav-icon">🔒</div>
+                <div>비밀</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 항목 추가/수정 모달 -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">새 항목 추가</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <form id="passwordForm" onsubmit="savePassword(event)">
+                <div class="form-group">
+                    <label>발란 이름</label>
+                    <input type="text" id="itemName" required>
+                </div>
+                <div class="form-group">
+                    <label>비밀</label>
+                    <input type="text" id="itemPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>주소</label>
+                    <input type="text" id="itemAddress" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">취소</button>
+                    <button type="button" class="btn btn-delete" id="deleteBtn" onclick="deletePassword()" style="display: none;">삭제</button>
+                    <button type="submit" class="btn btn-save">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 조회 전용 모달 (일반 사용자용) -->
+    <div class="modal" id="viewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>항목 조회</h2>
+                <button class="close-btn" onclick="closeViewModal()">×</button>
+            </div>
+            <div class="permission-notice">
+                🔒 일반 사용자는 조회만 가능합니다
+            </div>
+            <div class="form-group">
+                <label>발란 이름</label>
+                <input type="text" id="viewName" disabled>
+            </div>
+            <div class="form-group">
+                <label>비밀</label>
+                <input type="text" id="viewPassword" disabled>
+            </div>
+            <div class="form-group">
+                <label>주소</label>
+                <input type="text" id="viewAddress" disabled>
+            </div>
+            <button class="btn btn-cancel" onclick="closeViewModal()" style="width: 100%; margin-top: 20px;">닫기</button>
+        </div>
+    </div>
+
+    <!-- 관리자 패널 모달 -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>사용자 비밀번호 관리</h2>
+                <button class="close-btn" onclick="closeAdminPanel()">×</button>
+            </div>
+
+            <div class="form-group">
+                <label>새 사용자 추가</label>
+                <input type="text" id="newUserName" placeholder="사용자 이름">
+            </div>
+            <div class="form-group">
+                <label>비밀번호</label>
+                <input type="text" id="newUserPassword" placeholder="비밀번호">
+            </div>
+            <button class="btn btn-save" onclick="addUser()" style="width: 100%; margin-bottom: 30px;">
+                사용자 추가
+            </button>
+
+            <h3 style="margin-bottom: 15px; font-size: 18px;">등록된 사용자</h3>
+            <div class="user-list" id="userList"></div>
+        </div>
+    </div>
+
+    <script>
+        let passwords = [];
+        let editingIndex = -1;
+        let isLoggedIn = false;
+        let isAdmin = false;
+        let users = [];
+
+        // 관리자 비밀번호 (숨김)
+        const ADMIN_PASSWORD = '2143';
+        
+        // 기본 사용자 계정
+        const DEFAULT_USERS = [
+            { name: '사용자1', password: 'user1234' },
+            { name: '사용자2', password: 'user5678' }
+        ];
+
+        // 초기화
+        function init() {
+            loadUsers();
+            checkLoginStatus();
+        }
+
+        // 사용자 목록 로드
+        function loadUsers() {
+            const saved = localStorage.getItem('users');
+            if (saved) {
+                users = JSON.parse(saved);
+            } else {
+                users = DEFAULT_USERS;
+                saveUsers();
+            }
+        }
+
+        // 사용자 목록 저장
+        function saveUsers() {
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        // 로그인 상태 확인
+        function checkLoginStatus() {
+            const loginStatus = sessionStorage.getItem('isLoggedIn');
+            const adminStatus = sessionStorage.getItem('isAdmin');
+            
+            if (loginStatus === 'true') {
+                isLoggedIn = true;
+                isAdmin = adminStatus === 'true';
+                showMainApp();
+            } else {
+                showLoginScreen();
+            }
+        }
+
+        // 로그인
+        function login(event) {
+            event.preventDefault();
+            const password = document.getElementById('loginPassword').value;
+            const errorMsg = document.getElementById('errorMessage');
+
+            // 관리자 체크
+            if (password === ADMIN_PASSWORD) {
+                isLoggedIn = true;
+                isAdmin = true;
+                sessionStorage.setItem('isLoggedIn', 'true');
+                sessionStorage.setItem('isAdmin', 'true');
+                showMainApp();
+                return;
+            }
+
+            // 일반 사용자 체크
+            const user = users.find(u => u.password === password);
+            if (user) {
+                isLoggedIn = true;
+                isAdmin = false;
+                sessionStorage.setItem('isLoggedIn', 'true');
+                sessionStorage.setItem('isAdmin', 'false');
+                showMainApp();
+                return;
+            }
+
+            // 로그인 실패
+            errorMsg.classList.add('show');
+            document.getElementById('loginPassword').value = '';
+            setTimeout(() => {
+                errorMsg.classList.remove('show');
+            }, 3000);
+        }
+
+        // 로그아웃
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                isLoggedIn = false;
+                isAdmin = false;
+                sessionStorage.removeItem('isLoggedIn');
+                sessionStorage.removeItem('isAdmin');
+                showLoginScreen();
+            }
+        }
+
+        // 로그인 화면 표시
+        function showLoginScreen() {
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('mainApp').classList.remove('active');
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // 메인 앱 화면 표시
+        function showMainApp() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('mainApp').classList.add('active');
+            
+            // 관리자 버튼 표시
+            if (isAdmin) {
+                document.getElementById('adminBtn').style.display = 'flex';
+                document.getElementById('permissionNotice').style.display = 'none';
+            } else {
+                document.getElementById('adminBtn').style.display = 'none';
+                document.getElementById('permissionNotice').style.display = 'block';
+            }
+            
+            loadPasswords();
+        }
+
+        // 관리자 패널 열기
+        function openAdminPanel() {
+            if (!isAdmin) return;
+            renderUserList();
+            document.getElementById('adminModal').classList.add('active');
+        }
+
+        // 관리자 패널 닫기
+        function closeAdminPanel() {
+            document.getElementById('adminModal').classList.remove('active');
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserPassword').value = '';
+        }
+
+        // 사용자 목록 렌더링
+        function renderUserList() {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = users.map((user, index) => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <div class="user-name">${user.name}</div>
+                        <div class="user-password">비밀번호: ${user.password}</div>
+                    </div>
+                    <button class="delete-user-btn" onclick="deleteUser(${index})">삭제</button>
+                </div>
+            `).join('');
+        }
+
+        // 사용자 추가
+        function addUser() {
+            const name = document.getElementById('newUserName').value.trim();
+            const password = document.getElementById('newUserPassword').value.trim();
+
+            if (!name || !password) {
+                alert('이름과 비밀번호를 모두 입력해주세요.');
+                return;
+            }
+
+            if (password === ADMIN_PASSWORD) {
+                alert('관리자 비밀번호는 사용할 수 없습니다.');
+                return;
+            }
+
+            users.push({ name, password });
+            saveUsers();
+            renderUserList();
+            
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserPassword').value = '';
+            
+            alert(`사용자 "${name}"이(가) 추가되었습니다.\n비밀번호: ${password}`);
+        }
+
+        // 사용자 삭제
+        function deleteUser(index) {
+            if (confirm(`"${users[index].name}" 사용자를 삭제하시겠습니까?`)) {
+                users.splice(index, 1);
+                saveUsers();
+                renderUserList();
+            }
+        }
+
+        // 비밀번호 데이터 로드
+        function loadPasswords() {
+            const saved = localStorage.getItem('passwords');
+            if (saved) {
+                passwords = JSON.parse(saved);
+            } else {
+                passwords = [
+                    {"name": "west51", "password": "종3572", "address": "서부2길 14-2"},
+                    {"name": "가온아트빌", "password": "#2157#", "address": "동향교1길 27-16"},
+                    {"name": "강변파크빌", "password": "405#1234#t", "address": "남천로 174"},
+                    {"name": "갤럭시 진", "password": "종1223", "address": "동향교1길 16-8"},
+                    {"name": "경동빌", "password": "#2016#", "address": "동향교1길 16-17"},
+                    {"name": "경은하우스", "password": "#1001#", "address": "방천3길 11"},
+                    {"name": "골든네스트", "password": "종7247", "address": "남상평2길 35"},
+                    {"name": "금빛마을", "password": "#6565#", "address": "동부1길 26-3"},
+                    {"name": "나이스빌", "password": "#1907#", "address": "북문8길 16"},
+                    {"name": "노블하우스", "password": "종3142", "address": "웃방천3길 3"},
+                    {"name": "녹원캐슬", "password": "#2358#", "address": "북문8길 64"},
+                    {"name": "다드림", "password": "#7981#", "address": "동향교2길 9"},
+                    {"name": "다솜원룸", "password": "종2536", "address": "방천3길 11-10"},
+                    {"name": "다인빌리지", "password": "#6745#", "address": "서향교1길 27-10"},
+                    {"name": "동문빌", "password": "#7777#", "address": "서문3길 14-1"},
+                    {"name": "동부그린힐", "password": "10#9999#", "address": "동부4길 7-3"},
+                    {"name": "드림빌", "password": "종1604", "address": "서향교1길 73-14"},
+                    {"name": "레나빌", "password": "#3355#", "address": "북문3길 5-15"},
+                    {"name": "레이크 하우스", "password": "종1920", "address": "남상평1길 28-9"},
+                    {"name": "르비딤B빌", "password": "종7375", "address": "남상평2길 12-7"},
+                    {"name": "리치빌", "password": "#9988#", "address": "동향교3길 29"},
+                    {"name": "린파크뷰", "password": "#4455#", "address": "서향교1길 9-4"},
+                    {"name": "마이빌", "password": "종3572", "address": "방천3길 7-7"},
+                    {"name": "메이져빌", "password": "#7511#", "address": "서향교1길46"},
+                    {"name": "목화방", "password": "#4377#", "address": "서문2길 16"},
+                    {"name": "목화하우스A동", "password": "#7777#", "address": "방천7길 20"},
+                    {"name": "목화하우스B동", "password": "#7777#", "address": "방천5길 17-1"},
+                    {"name": "무궁화빌", "password": "종9342", "address": "동부2길 35"},
+                    {"name": "미성빌", "password": "1357#", "address": "남상평2길 12-15"},
+                    {"name": "백산아트빌", "password": "#1234#", "address": "서상평길 9-9"},
+                    {"name": "별하우스", "password": "열쇠1235열쇠", "address": "남상평3길 15-2"},
+                    {"name": "복돼지3차", "password": "#1234#", "address": "남천로 182"},
+                    {"name": "서문빌", "password": "#1111#", "address": "서문3길 14"},
+                    {"name": "서부목화빌", "password": "#7777#", "address": "방천 3길 5-2"},
+                    {"name": "서원빌", "password": "#5678#", "address": "서향교1길 27-2"},
+                    {"name": "성우빌라 B동 1,2,3라인", "password": "36551*", "address": "북문3길 23-3"},
+                    {"name": "세경빌", "password": "종9181", "address": "서향교1길 15-4"},
+                    {"name": "세경하우스", "password": "종9181", "address": "동향교3길 23-1"},
+                    {"name": "세홈원룸", "password": "#1231#", "address": "동부9길 13-3"},
+                    {"name": "소슬채아파트", "password": "종6530", "address": "교동로 29"},
+                    {"name": "스타골든캐슬", "password": "종3788", "address": "구교동길 20"},
+                    {"name": "신한빌리지", "password": "7890#", "address": "웃방천3길 17"},
+                    {"name": "아펠바움", "password": "종7016", "address": "서상평길 23-13"},
+                    {"name": "에코하우스", "password": "종2580", "address": "남상평2길 34-9"},
+                    {"name": "에코하우스", "password": "#2014#", "address": "동향교3길 31-5"},
+                    {"name": "엘파크", "password": "#9999#", "address": "남상평2길 31"},
+                    {"name": "옛살비하우스", "password": "#1234#", "address": "서문3길 18"},
+                    {"name": "온누리", "password": "2550#", "address": "서향교1길 15-5"},
+                    {"name": "우성스카이빌", "password": "#6249#", "address": "동향교2길 5-11"},
+                    {"name": "우성포시즌", "password": "종1288", "address": "상평1길 10"},
+                    {"name": "우주파크", "password": "#8888#", "address": "교동로 39"},
+                    {"name": "월드빌", "password": "#0308#", "address": "동향교3길 32-4"},
+                    {"name": "유진빌", "password": "#2406#", "address": "서향교1길 21-10"},
+                    {"name": "윤정빌", "password": "8585#", "address": "동향교2길 18-11"},
+                    {"name": "이지스타운", "password": "#3844#", "address": "교동로 34"},
+                    {"name": "재경빌", "password": "종1663", "address": "반구대로 860-9"},
+                    {"name": "지프하우스", "password": "종6429", "address": "동향교4길 17"},
+                    {"name": "천지아파트", "password": "종1234", "address": "동부9길 5"},
+                    {"name": "캐슬하우스", "password": "#8989#", "address": "북문2길 15"},
+                    {"name": "클래식 타운캐슬", "password": "#7063#", "address": "서향교1길 27-7"},
+                    {"name": "토마스빌", "password": "#7777#", "address": "서향교1길 72-1"},
+                    {"name": "토미하우스", "password": "문1234", "address": "동향교3길 28"},
+                    {"name": "파크빌A", "password": "#3904#", "address": "북문2길 17"},
+                    {"name": "풀하우스2", "password": "#9999#", "address": "북문1길 5-4"},
+                    {"name": "하이야트A동", "password": "#2346#", "address": "방천2길 22"},
+                    {"name": "한라빌리지", "password": "1024", "address": "헌양길 189"},
+                    {"name": "한영빌", "password": "종9181", "address": "서향교1길 15-6"},
+                    {"name": "해오름", "password": "#2018#", "address": "동부6길 7"},
+                    {"name": "해피룸 3차", "password": "#2569#", "address": "방천3길 15-5"},
+                    {"name": "행복이 가득한집", "password": "종1234", "address": "서향교1길 31-8"},
+                    {"name": "현대빌리지", "password": "#9373#", "address": "서상평길 25"},
+                    {"name": "홍희좋은빌", "password": "종0079", "address": "방천3길 15"},
+                    {"name": "효염빌리지", "password": "손 1234#", "address": "웃방천3길 21"},
+                    {"name": "히트하우스", "password": "#5829#", "address": "동향교2길 19"},
+                    {"name": "힐링하우스", "password": "종8271", "address": "남천로 144"}
+                ];
+                saveToStorage();
+            }
+            renderPasswords();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('passwords', JSON.stringify(passwords));
+        }
+
+        function renderPasswords(filteredData = null) {
+            const data = filteredData || passwords;
+            const listDiv = document.getElementById('passwordList');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (data.length === 0) {
+                listDiv.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            
+            // 관리자는 클릭 가능, 일반 사용자는 조회만 가능
+            if (isAdmin) {
+                listDiv.innerHTML = data.map((item, index) => `
+                    <div class="table-row clickable" onclick="openEditModal(${passwords.indexOf(item)})">
+                        <div class="row-number">${passwords.indexOf(item) + 1}</div>
+                        <div class="row-content">${item.name}</div>
+                        <div class="row-content">${item.password}</div>
+                        <div class="row-content">${item.address}</div>
+                    </div>
+                `).join('');
+            } else {
+                listDiv.innerHTML = data.map((item, index) => `
+                    <div class="table-row clickable" onclick="openViewModal(${passwords.indexOf(item)})">
+                        <div class="row-number">${passwords.indexOf(item) + 1}</div>
+                        <div class="row-content">${item.name}</div>
+                        <div class="row-content">${item.password}</div>
+                        <div class="row-content">${item.address}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function searchPasswords() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm === '') {
+                renderPasswords();
+                return;
+            }
+
+            const filtered = passwords.filter(item => 
+                item.name.toLowerCase().includes(searchTerm) ||
+                item.password.toLowerCase().includes(searchTerm) ||
+                item.address.toLowerCase().includes(searchTerm)
+            );
+            renderPasswords(filtered);
+        }
+
+        function openAddModal() {
+            editingIndex = -1;
+            document.getElementById('modalTitle').textContent = '새 항목 추가';
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemPassword').value = '';
+            document.getElementById('itemAddress').value = '';
+            document.getElementById('deleteBtn').style.display = 'none';
+            document.getElementById('passwordModal').classList.add('active');
+        }
+
+        // 관리자 전용 - 수정 모달
+        function openEditModal(index) {
+            if (!isAdmin) {
+                openViewModal(index);
+                return;
+            }
+            
+            editingIndex = index;
+            const item = passwords[index];
+            document.getElementById('modalTitle').textContent = '항목 수정';
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemPassword').value = item.password;
+            document.getElementById('itemAddress').value = item.address;
+            document.getElementById('deleteBtn').style.display = 'block';
+            document.getElementById('passwordModal').classList.add('active');
+        }
+
+        // 일반 사용자용 - 조회 전용 모달
+        function openViewModal(index) {
+            const item = passwords[index];
+            document.getElementById('viewName').value = item.name;
+            document.getElementById('viewPassword').value = item.password;
+            document.getElementById('viewAddress').value = item.address;
+            document.getElementById('viewModal').classList.add('active');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.remove('active');
+        }
+
+        function closeModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+        }
+
+        function savePassword(event) {
+            event.preventDefault();
+            
+            const newItem = {
+                name: document.getElementById('itemName').value,
+                password: document.getElementById('itemPassword').value,
+                address: document.getElementById('itemAddress').value
+            };
+
+            if (editingIndex === -1) {
+                // 새 항목 추가 - 모든 사용자 가능
+                passwords.push(newItem);
+            } else {
+                // 수정 - 관리자만 가능
+                if (!isAdmin) {
+                    alert('수정 권한이 없습니다.');
+                    closeModal();
+                    return;
+                }
+                passwords[editingIndex] = newItem;
+            }
+
+            saveToStorage();
+            renderPasswords();
+            closeModal();
+        }
+
+        function deletePassword() {
+            // 삭제 - 관리자만 가능
+            if (!isAdmin) {
+                alert('삭제 권한이 없습니다.');
+                return;
+            }
+            
+            if (editingIndex !== -1 && confirm('정말 삭제하시겠습니까?')) {
+                passwords.splice(editingIndex, 1);
+                saveToStorage();
+                renderPasswords();
+                closeModal();
+            }
+        }
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        document.getElementById('viewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeViewModal();
+            }
+        });
+
+        document.getElementById('adminModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAdminPanel();
+            }
+        });
+
+        // 초기화
+        init();
+    </script>
+</body>
+</html>
