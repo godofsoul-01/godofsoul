@@ -1,1121 +1,2595 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>비밀</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-            background: #1a1a1a;
-            color: #ffffff;
-            padding: 20px;
-            padding-bottom: 80px;
-        }
-
-        /* 로그인 화면 스타일 */
-        .login-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .login-box {
-            background: #2a2a2a;
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
-        .login-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
-
-        .login-subtitle {
-            color: #888;
-            font-size: 14px;
-        }
-
-        .login-form {
-            margin-top: 30px;
-        }
-
-        .login-form-group {
-            margin-bottom: 20px;
-        }
-
-        .login-form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #aaa;
-            font-size: 14px;
-        }
-
-        .login-form-group input {
-            width: 100%;
-            padding: 12px;
-            background: #1a1a1a;
-            border: 1px solid #3a3a3a;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-        }
-
-        .login-form-group input:focus {
-            outline: none;
-            border-color: #8b5cf6;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #8b5cf6, #d946ef);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: transform 0.2s;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-        }
-
-        .login-btn:active {
-            transform: scale(0.98);
-        }
-
-        .error-message {
-            background: rgba(220, 38, 38, 0.2);
-            border: 1px solid #dc2626;
-            color: #fca5a5;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 14px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        /* 메인 앱 화면 */
-        .main-app {
-            display: none;
-        }
-
-        .main-app.active {
-            display: block;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .add-btn, .logout-btn, .admin-btn {
-            background: linear-gradient(135deg, #8b5cf6, #d946ef);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-            transition: transform 0.2s;
-        }
-
-        .logout-btn {
-            background: #3a3a3a;
-            box-shadow: none;
-            padding: 10px 15px;
-            font-size: 14px;
-        }
-
-        .admin-btn {
-            background: linear-gradient(135deg, #059669, #10b981);
-        }
-
-        .add-btn:hover, .logout-btn:hover, .admin-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .add-btn:active, .logout-btn:active, .admin-btn:active {
-            transform: scale(0.95);
-        }
-
-        .search-box {
-            background: #2a2a2a;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 15px;
-            width: 100%;
-            color: #ffffff;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-
-        .search-box::placeholder {
-            color: #888;
-        }
-
-        .table-header {
-            display: grid;
-            grid-template-columns: 50px 2fr 2fr 2fr;
-            padding: 10px;
-            background: #2a2a2a;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #888;
-        }
-
-        .table-row {
-            display: grid;
-            grid-template-columns: 50px 2fr 2fr 2fr;
-            padding: 15px 10px;
-            background: #252525;
-            border-radius: 10px;
-            margin-bottom: 8px;
-            align-items: center;
-            transition: all 0.2s;
-        }
-
-        .table-row.clickable {
-            cursor: pointer;
-        }
-
-        .table-row.clickable:hover {
-            background: #2d2d2d;
-            transform: translateX(5px);
-        }
-
-        .table-row.clickable:active {
-            transform: scale(0.98);
-        }
-
-        .table-row.view-only {
-            cursor: default;
-        }
-
-        .row-number {
-            color: #666;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .row-content {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            padding: 0 5px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: #2a2a2a;
-            border-radius: 20px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h2 {
-            font-size: 22px;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 32px;
-            cursor: pointer;
-            padding: 0;
-            width: 35px;
-            height: 35px;
-            line-height: 35px;
-            transition: color 0.2s;
-        }
-
-        .close-btn:hover {
-            color: #fff;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #aaa;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            background: #1a1a1a;
-            border: 1px solid #3a3a3a;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #8b5cf6;
-        }
-
-        .form-group input:disabled {
-            background: #2a2a2a;
-            color: #666;
-            cursor: not-allowed;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 30px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-save {
-            background: linear-gradient(135deg, #8b5cf6, #d946ef);
-            color: white;
-        }
-
-        .btn-save:hover {
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-        }
-
-        .btn-cancel {
-            background: #3a3a3a;
-            color: white;
-        }
-
-        .btn-cancel:hover {
-            background: #4a4a4a;
-        }
-
-        .btn-delete {
-            background: #dc2626;
-            color: white;
-        }
-
-        .btn-delete:hover {
-            background: #ef4444;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-
-        .empty-state-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #1a1a1a;
-            border-top: 1px solid #2a2a2a;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 100;
-        }
-
-        .nav-item {
-            text-align: center;
-            color: #666;
-            font-size: 12px;
-            padding: 10px;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .nav-item.active {
-            color: #d946ef;
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-
-        .user-list {
-            margin-top: 20px;
-        }
-
-        .user-item {
-            background: #252525;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-info {
-            flex: 1;
-        }
-
-        .user-name {
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        .user-password {
-            font-size: 14px;
-            color: #888;
-        }
-
-        .delete-user-btn {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .permission-notice {
-            background: rgba(234, 179, 8, 0.1);
-            border: 1px solid #eab308;
-            color: #fde047;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            line-height: 1.6;
-            text-align: center;
-        }
-
-        /* 모바일 최적화 */
-        @media (max-width: 600px) {
-            .table-header,
-            .table-row {
-                font-size: 13px;
-            }
-
-            .row-content {
-                padding: 0 3px;
-            }
-
-            .header-buttons {
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .add-btn, .logout-btn, .admin-btn {
-                font-size: 14px;
-                padding: 8px 15px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>비밀</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-alt: #111827;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59, 130, 246, 0.15);
+      --danger: #ef4444;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.5);
+      --shadow-hard: 0 24px 60px rgba(0, 0, 0, 0.7);
+      --glass: rgba(15, 23, 42, 0.85);
+      --success: #22c55e;
+      --warning: #eab308;
+      --tag-bg: rgba(148, 163, 184, 0.12);
+      --tag-border: rgba(148, 163, 184, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #1e293b, #020617),
+        radial-gradient(circle at bottom right, #0f172a, #020617);
+      color: var(--text);
+      padding: 1.5rem;
+    }
+
+    .gradient-orbs::before,
+    .gradient-orbs::after {
+      content: "";
+      position: fixed;
+      width: 480px;
+      height: 480px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.16), transparent 70%);
+      z-index: -2;
+      filter: blur(2px);
+    }
+
+    .gradient-orbs::before {
+      top: -160px;
+      left: -120px;
+    }
+
+    .gradient-orbs::after {
+      bottom: -160px;
+      right: -120px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.18), transparent 70%);
+    }
+
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.08;
+      mix-blend-mode: soft-light;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='noStitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/%3E%3C/svg%3E");
+      z-index: -1;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
+      gap: 1.75rem;
+      width: 100%;
+      max-width: 1120px;
+      backdrop-filter: blur(26px);
+      -webkit-backdrop-filter: blur(26px);
+      background: linear-gradient(
+          135deg,
+          rgba(15, 23, 42, 0.96),
+          rgba(15, 23, 42, 0.98),
+          rgba(2, 6, 23, 0.98)
+        );
+      border-radius: 32px;
+      box-shadow: var(--shadow-hard);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+          circle at top left,
+          rgba(59, 130, 246, 0.08),
+          transparent 55%
+        ),
+        radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.08), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .app-shell > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .divider {
+      width: 1px;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(148, 163, 184, 0.45),
+        transparent
+      );
+      margin: -1.75rem 0;
+    }
+
+    .pane {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .title-block {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle, var(--accent), rgba(59, 130, 246, 0.15));
+      position: relative;
+      box-shadow: 0 0 18px rgba(59, 130, 246, 0.65);
+    }
+
+    .pulse-dot::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: inherit;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      opacity: 0.8;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin: 0;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .lock-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .badge {
+      padding: 0.22rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.6);
+      background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.35), transparent 65%);
+      color: #e0f2fe;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.9);
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 0.72rem;
+      padding: 0.12rem 0.55rem;
+      border-radius: 999px;
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .tag strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .warning-tag {
+      color: #facc15;
+      border-color: rgba(250, 204, 21, 0.6);
+      background: radial-gradient(circle at top left, rgba(250, 204, 21, 0.24), transparent 70%);
+    }
+
+    .warning-tag span {
+      font-size: 0.9rem;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      box-shadow: var(--shadow-soft);
+      padding: 1.05rem 1.15rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle at top right,
+        rgba(59, 130, 246, 0.23),
+        transparent 70%
+      );
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      gap: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .card-title span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: rgba(31, 41, 55, 0.85);
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      font-size: 0.75rem;
+    }
+
+    .card-subtext {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .input-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-top: 0.35rem;
+    }
+
+    .input-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .input-label span {
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .input-label small {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 0.58rem 0.85rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      background: rgba(15, 23, 42, 0.96);
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,
+        transform 0.12s ease;
+    }
+
+    .input-field::placeholder {
+      color: rgba(148, 163, 184, 0.75);
+    }
+
+    .input-field:focus {
+      border-color: rgba(59, 130, 246, 0.9);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.75), 0 0 20px rgba(37, 99, 235, 0.45);
+      background: rgba(15, 23, 42, 0.98);
+      transform: translateY(-0.5px);
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 0.68rem;
+      color: rgba(148, 163, 184, 0.9);
+      font-size: 0.9rem;
+    }
+
+    .helper-text {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .error-text {
+      font-size: 0.8rem;
+      color: var(--danger);
+      margin-top: 0.35rem;
+      display: none;
+    }
+
+    .error-text.visible {
+      display: block;
+    }
+
+    .primary-button {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border-radius: var(--radius-md);
+      border: none;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      box-shadow: 0 16px 35px rgba(37, 99, 235, 0.55);
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 0.7rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease,
+        opacity 0.12s ease;
+    }
+
+    .primary-button:hover {
+      transform: translateY(-0.5px);
+      box-shadow: 0 18px 40px rgba(37, 99, 235, 0.65);
+      background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    }
+
+    .primary-button:active {
+      transform: translateY(0.4px) scale(0.995);
+      box-shadow: 0 12px 26px rgba(37, 99, 235, 0.45);
+    }
+
+    .primary-button-icon {
+      font-size: 1.1rem;
+    }
+
+    .primary-button-sub {
+      font-size: 0.7rem;
+      text-transform: none;
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .toolbar-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .pill-group {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 0.12rem;
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(31, 41, 55, 0.95);
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 1);
+    }
+
+    .pill-button {
+      border-radius: 999px;
+      padding: 0.2rem 0.58rem;
+      font-size: 0.72rem;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease, transform 0.1s ease,
+        box-shadow 0.1s ease;
+    }
+
+    .pill-button span {
+      font-size: 0.9rem;
+    }
+
+    .pill-button.active {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.95));
+      color: #e5f0ff;
+      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.4), 0 10px 20px rgba(37, 99, 235, 0.6);
+      transform: translateY(-0.2px);
+    }
+
+    .pill-button:not(.active):hover {
+      background: rgba(31, 41, 55, 0.95);
+      color: #e5e7eb;
+      transform: translateY(-0.1px);
+    }
+
+    .add-button {
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.8);
+      background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.28), transparent 68%);
+      color: #d1fae5;
+      font-size: 0.82rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(16, 185, 129, 0.35);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+
+    .add-button span {
+      font-size: 0.95rem;
+    }
+
+    .add-button:hover {
+      transform: translateY(-0.35px);
+      box-shadow: 0 16px 36px rgba(16, 185, 129, 0.45);
+      background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.36), transparent 70%);
+    }
+
+    .add-button:active {
+      transform: translateY(0.2px) scale(0.995);
+      box-shadow: 0 10px 22px rgba(16, 185, 129, 0.35);
+    }
+
+    .logout-pill {
+      padding: 0.32rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease,
+        transform 0.1s ease;
+    }
+
+    .logout-pill span {
+      font-size: 0.9rem;
+    }
+
+    .logout-pill:hover {
+      background: rgba(31, 41, 55, 0.98);
+      color: #e5e7eb;
+      border-color: rgba(156, 163, 175, 0.95);
+      transform: translateY(-0.15px);
+    }
+
+    .hint {
+      margin-top: 0.4rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .hint span {
+      font-size: 0.95rem;
+    }
+
+    .table-wrapper {
+      margin-top: 0.6rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(31, 41, 55, 0.98);
+      background: rgba(15, 23, 42, 0.98);
+      overflow: hidden;
+      max-height: 260px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .table-wrapper::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+          to bottom,
+          rgba(15, 23, 42, 0.96),
+          transparent 12%,
+          transparent 88%,
+          rgba(15, 23, 42, 0.98)
+        ),
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.18), transparent 60%);
+      pointer-events: none;
+    }
+
+    .table-header {
+      display: grid;
+      grid-template-columns: 1.4fr 1.4fr 2.1fr 0.9fr;
+      gap: 0.25rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.98);
+      background: linear-gradient(
+        to right,
+        rgba(15, 23, 42, 0.98),
+        rgba(15, 23, 42, 0.98),
+        rgba(15, 23, 42, 0.98)
+      );
+      position: relative;
+      z-index: 1;
+    }
+
+    .table-header span {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .table-header small {
+      font-size: 0.8em;
+      opacity: 0.7;
+    }
+
+    .table-body {
+      overflow-y: auto;
+      padding: 0.08rem 0.5rem 0.1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1.4fr 2.1fr 0.9fr;
+      gap: 0.25rem;
+      padding: 0.32rem 0.25rem;
+      align-items: center;
+      font-size: 0.82rem;
+      border-radius: 10px;
+      margin: 0.12rem 0.2rem;
+      position: relative;
+      cursor: default;
+      border: 1px solid transparent;
+      transition: background 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease,
+        transform 0.08s ease;
+    }
+
+    .table-row::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        circle at top left,
+        rgba(59, 130, 246, 0.16),
+        transparent 70%
+      );
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.16s ease;
+    }
+
+    .table-row:hover {
+      background: linear-gradient(
+        to right,
+        rgba(30, 64, 175, 0.42),
+        rgba(15, 23, 42, 0.96)
+      );
+      border-color: rgba(59, 130, 246, 0.7);
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.4);
+      transform: translateY(-0.3px);
+    }
+
+    .table-row:hover::before {
+      opacity: 1;
+    }
+
+    .table-row span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .table-row .tag {
+      justify-self: flex-start;
+    }
+
+    .empty-state {
+      padding: 1.7rem 0.8rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .empty-state strong {
+      color: #e5e7eb;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .table-footer {
+      padding: 0.32rem 0.75rem 0.45rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+      border-top: 1px solid rgba(31, 41, 55, 0.95);
+      background: linear-gradient(
+        to right,
+        rgba(15, 23, 42, 0.98),
+        rgba(15, 23, 42, 0.98),
+        rgba(15, 23, 42, 0.98)
+      );
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .table-footer span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .selector-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      background: rgba(15, 23, 42, 0.96);
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .selector-pill strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .selector-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.9);
+    }
+
+    .selector-dot.active {
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.9);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.96));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 540px;
+      background: rgba(15, 23, 42, 0.98);
+      border-radius: 22px;
+      border: 1px solid rgba(55, 65, 81, 1);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+      padding: 1.3rem 1.35rem 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+          circle at top right,
+          rgba(59, 130, 246, 0.25),
+          transparent 70%
+        ),
+        radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.18), transparent 70%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .modal > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .modal-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .modal-title {
+      font-size: 0.96rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .modal-chip {
+      font-size: 0.72rem;
+      padding: 0.12rem 0.52rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .modal-chip span {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #f97316;
+      box-shadow: 0 0 10px rgba(249, 115, 22, 0.9);
+    }
+
+    .modal-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .modal-close {
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--muted);
+      padding: 0.2rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease,
+        transform 0.08s ease;
+    }
+
+    .modal-close span {
+      font-size: 0.9rem;
+    }
+
+    .modal-close:hover {
+      background: rgba(31, 41, 55, 0.98);
+      color: #e5e7eb;
+      border-color: rgba(156, 163, 175, 0.95);
+      transform: translateY(-0.15px);
+    }
+
+    .modal-body {
+      margin-top: 0.4rem;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.4fr);
+      gap: 0.9rem;
+      margin-top: 0.45rem;
+    }
+
+    .modal-section-title {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .modal-section-title span {
+      width: 14px;
+      height: 1px;
+      border-radius: 999px;
+      background: linear-gradient(to right, rgba(148, 163, 184, 0.9), transparent);
+    }
+
+    .modal-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .modal-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-label span {
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .modal-label small {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 0.54rem 0.8rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(55, 65, 81, 0.98);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .modal-input:focus {
+      border-color: rgba(59, 130, 246, 0.9);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.7);
+      background: rgba(15, 23, 42, 0.99);
+    }
+
+    .modal-input::placeholder {
+      color: rgba(148, 163, 184, 0.75);
+    }
+
+    textarea.modal-input {
+      resize: vertical;
+      min-height: 80px;
+      max-height: 140px;
+      line-height: 1.5;
+    }
+
+    .modal-footer {
+      margin-top: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+    }
+
+    .modal-footer-left {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .secondary-button {
+      padding: 0.48rem 0.9rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(75, 85, 99, 0.98);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--muted);
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease,
+        transform 0.08s ease;
+    }
+
+    .secondary-button span {
+      font-size: 0.95rem;
+    }
+
+    .secondary-button:hover {
+      background: rgba(30, 64, 175, 0.65);
+      border-color: rgba(59, 130, 246, 0.9);
+      color: #e5e7eb;
+      transform: translateY(-0.2px);
+    }
+
+    .secondary-button.danger {
+      border-color: rgba(248, 113, 113, 0.8);
+      color: #fecaca;
+      background: radial-gradient(circle at top left, rgba(248, 113, 113, 0.3), transparent 68%);
+    }
+
+    .secondary-button.danger:hover {
+      background: radial-gradient(circle at top left, rgba(248, 113, 113, 0.4), transparent 70%);
+      box-shadow: 0 14px 32px rgba(239, 68, 68, 0.5);
+    }
+
+    .modal-primary {
+      padding: 0.55rem 1.15rem;
+      border-radius: var(--radius-md);
+      border: none;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      font-weight: 600;
+      font-size: 0.86rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      box-shadow: 0 18px 38px rgba(37, 99, 235, 0.65);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+
+    .modal-primary span {
+      font-size: 1.05rem;
+    }
+
+    .modal-primary:hover {
+      transform: translateY(-0.25px);
+      background: linear-gradient(135deg, #1d4ed8, #1e40af);
+      box-shadow: 0 22px 46px rgba(37, 99, 235, 0.8);
+    }
+
+    .modal-primary:active {
+      transform: translateY(0.2px) scale(0.995);
+      box-shadow: 0 14px 28px rgba(37, 99, 235, 0.5);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.35rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(140%);
+      min-width: min(360px, 92vw);
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.98);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.8);
+      padding: 0.6rem 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      z-index: 60;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      opacity: 0;
+    }
+
+    .toast.visible {
+      transform: translateX(-50%) translateY(0%);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(34, 197, 94, 0.4), transparent 70%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #bbf7d0;
+      box-shadow: 0 0 14px rgba(34, 197, 94, 0.8);
+    }
+
+    .toast-message {
+      flex: 1;
+    }
+
+    .toast-message strong {
+      color: #e5e7eb;
+      font-weight: 500;
+      margin-right: 0.25rem;
+    }
+
+    .toast-close {
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--muted);
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.78rem;
+      transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+    }
+
+    .toast-close:hover {
+      background: rgba(31, 41, 55, 0.98);
+      color: #e5e7eb;
+      border-color: rgba(156, 163, 175, 0.95);
+    }
+
+    .user-card {
+      margin-top: 0.6rem;
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(75, 85, 99, 0.98);
+      padding: 0.6rem 0.8rem;
+      background: rgba(15, 23, 42, 0.98);
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: grid;
+      grid-template-columns: 1.1fr 1.1fr;
+      gap: 0.4rem 0.9rem;
+      align-items: start;
+    }
+
+    .user-card strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .user-card span {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.12rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.98);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .user-badge span {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.95);
+    }
+
+    .user-password-list {
+      margin-top: 0.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(31, 41, 55, 0.98);
+      background: rgba(15, 23, 42, 0.98);
+      padding: 0.55rem 0.8rem 0.6rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .user-password-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .password-count {
+      padding: 0.08rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.98);
+      background: rgba(15, 23, 42, 0.98);
+      font-size: 0.72rem;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .password-count span {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.95);
+    }
+
+    .user-password-tagline {
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+
+    .user-password-item {
+      border-radius: 999px;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid rgba(55, 65, 81, 0.98);
+      background: rgba(15, 23, 42, 0.98);
+      margin-top: 0.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+
+    .user-password-item span {
+      font-size: 0.78rem;
+    }
+
+    .badge-compact {
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      font-size: 0.7rem;
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    .login-only {
+      display: block;
+    }
+
+    .logged-in-only {
+      display: none;
+    }
+
+    .admin-only {
+      display: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .readonly-info {
+      font-size: 0.76rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.35rem;
+    }
+
+    .readonly-info span {
+      font-size: 0.9rem;
+    }
+
+    .view-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.96));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 45;
+      padding: 1.5rem;
+    }
+
+    .view-modal-overlay.visible {
+      display: flex;
+    }
+
+    .view-modal {
+      width: 100%;
+      max-width: 540px;
+      background: rgba(15, 23, 42, 0.98);
+      border-radius: 22px;
+      border: 1px solid rgba(55, 65, 81, 0.98);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+      padding: 1.3rem 1.35rem 1.15rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .view-modal::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+          circle at top right,
+          rgba(59, 130, 246, 0.22),
+          transparent 70%
+        ),
+        radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.18), transparent 70%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .view-modal > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .view-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .view-modal-title {
+      font-size: 0.96rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .view-modal-chip {
+      font-size: 0.72rem;
+      padding: 0.12rem 0.52rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .view-modal-chip span {
+      font-size: 0.95rem;
+    }
+
+    .view-modal-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .view-modal-body {
+      margin-top: 0.55rem;
+    }
+
+    .view-field {
+      margin-bottom: 0.65rem;
+    }
+
+    .view-label {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.12rem;
+    }
+
+    .view-value {
+      font-size: 0.9rem;
+      color: #e5e7eb;
+      padding: 0.35rem 0.6rem;
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(31, 41, 55, 0.98);
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+
+    .view-footer {
+      margin-top: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .view-footer span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.08rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.75);
+      background: rgba(15, 23, 42, 0.98);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .auth-badge span {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.95);
+    }
+
+    .password-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .toggle-visibility-btn {
+      position: absolute;
+      right: 0.6rem;
+      border: none;
+      background: none;
+      color: rgba(148, 163, 184, 0.9);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 0.75rem;
+      }
+
+      .app-shell {
+        display: flex;
+        flex-direction: column;
+        border-radius: 24px;
+        padding: 1.1rem 1.05rem;
+      }
+
+      .divider {
+        height: 1px;
+        width: auto;
+        background: radial-gradient(
+          circle at center,
+          rgba(148, 163, 184, 0.55),
+          transparent 70%
+        );
+        margin: 0.4rem -1.1rem;
+      }
+
+      .modal,
+      .view-modal {
+        max-width: 480px;
+        padding: 1.1rem 1.05rem 1rem;
+      }
+
+      .modal-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.7rem;
+      }
+
+      .table-wrapper {
+        max-height: 240px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.45rem;
+      }
+
+      .toolbar-left {
+        justify-content: space-between;
+      }
+
+      .table-header,
+      .table-row {
+        grid-template-columns: 1.3fr 1.3fr 1.9fr;
+      }
+
+      .table-header span:last-child,
+      .table-row span:last-child {
+        display: none;
+      }
+
+      .toast {
+        min-width: min(340px, 94vw);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .app-shell {
+        padding: 0.9rem 0.85rem 0.85rem;
+        border-radius: 20px;
+      }
+
+      .card {
+        padding: 0.9rem 0.9rem;
+      }
+
+      .table-header {
+        padding-inline: 0.6rem;
+      }
+
+      .table-body {
+        padding-inline: 0.2rem;
+      }
+
+      .table-row {
+        margin-inline: 0.1rem;
+      }
+
+      .table-footer {
+        padding-inline: 0.6rem;
+      }
+
+      .modal,
+      .view-modal {
+        padding: 0.95rem 0.9rem 0.9rem;
+      }
+
+      .toast {
+        padding-inline: 0.8rem;
+      }
+
+      h1 {
+        font-size: 1.05rem;
+      }
+    }
+  </style>
 </head>
-<body>
-    <!-- 로그인 화면 -->
-    <div class="login-container" id="loginContainer">
-        <div class="login-box">
-            <div class="login-header">
-                <div class="login-icon">🔒</div>
-                <h1>비밀</h1>
-                <p class="login-subtitle">비밀번호를 입력하세요</p>
-            </div>
+<body class="gradient-orbs">
+  <div class="noise-overlay"></div>
 
-            <div class="error-message" id="errorMessage">
-                비밀번호가 올바르지 않습니다
+  <div class="app-shell">
+    <div class="pane">
+      <div class="header-row">
+        <div class="title-block">
+          <div class="pulse-dot"></div>
+          <div>
+            <h1>
+              비밀
+              <span class="lock-pill">
+                <span>🔐</span>
+                Private vault
+              </span>
+            </h1>
+            <div class="status-row">
+              <div class="badge">
+                <span class="badge-dot"></span>
+                Local-only · Zero sync
+              </div>
+              <span class="tag">
+                <strong>암호</strong>는 브라우저
+                안에서만 보관돼요
+              </span>
             </div>
-
-            <form class="login-form" onsubmit="login(event)">
-                <div class="login-form-group">
-                    <label>비밀번호</label>
-                    <input type="password" id="loginPassword" placeholder="비밀번호 입력" required autofocus>
-                </div>
-                <button type="submit" class="login-btn">로그인</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- 메인 앱 화면 -->
-    <div class="main-app" id="mainApp">
-        <div class="header">
-            <h1>비밀</h1>
-            <div class="header-buttons">
-                <button class="admin-btn" id="adminBtn" onclick="openAdminPanel()" style="display: none;">
-                    ⚙️ 관리
-                </button>
-                <button class="add-btn" onclick="openAddModal()">
-                    <span>+</span> Add
-                </button>
-                <button class="logout-btn" onclick="logout()">
-                    🚪 로그아웃
-                </button>
-            </div>
+          </div>
         </div>
 
-        <div class="permission-notice" id="permissionNotice" style="display: none;">
-            ℹ️ 일반 사용자는 항목 추가만 가능합니다. 수정/삭제는 관리자만 가능합니다.
+        <div class="login-only">
+          <button id="settingsBtn" class="logout-pill admin-only">
+            <span>⚙️</span>
+            관리
+          </button>
+        </div>
+      </div>
+
+      <div class="card login-only" id="loginCard">
+        <div class="card-header-row">
+          <div>
+            <div class="card-title">
+              <span>🔑</span>
+              비밀번호를 입력하세요
+            </div>
+            <div class="card-subtext">
+              이 기기에서만 사용할 간단한 암호예요. 서버나 인터넷에 전혀 저장되지
+              않습니다.
+            </div>
+          </div>
+          <div class="user-badge">
+            <span></span>
+            Local session
+          </div>
         </div>
 
-        <input type="text" class="search-box" placeholder="🔍 검색" id="searchInput" oninput="searchPasswords()">
-
-        <div class="table-header">
-            <div></div>
-            <div>발란 이름</div>
-            <div>비밀</div>
-            <div>주소</div>
-        </div>
-
-        <div id="passwordList"></div>
-
-        <div class="empty-state" id="emptyState" style="display: none;">
-            <div class="empty-state-icon">🔒</div>
-            <p>저장된 비밀번호가 없습니다</p>
-            <p style="margin-top: 10px; font-size: 14px;">+ Add 버튼을 눌러 추가하세요</p>
-        </div>
-
-        <div class="bottom-nav">
-            <div class="nav-item">
-                <div class="nav-icon">👤</div>
-                <div>Users</div>
-            </div>
-            <div class="nav-item active">
-                <div class="nav-icon">🔒</div>
-                <div>비밀</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 항목 추가/수정 모달 -->
-    <div class="modal" id="passwordModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">새 항목 추가</h2>
-                <button class="close-btn" onclick="closeModal()">×</button>
-            </div>
-            <form id="passwordForm" onsubmit="savePassword(event)">
-                <div class="form-group">
-                    <label>발란 이름</label>
-                    <input type="text" id="itemName" required>
-                </div>
-                <div class="form-group">
-                    <label>비밀</label>
-                    <input type="text" id="itemPassword" required>
-                </div>
-                <div class="form-group">
-                    <label>주소</label>
-                    <input type="text" id="itemAddress" required>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-cancel" onclick="closeModal()">취소</button>
-                    <button type="button" class="btn btn-delete" id="deleteBtn" onclick="deletePassword()" style="display: none;">삭제</button>
-                    <button type="submit" class="btn btn-save">저장</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 조회 전용 모달 (일반 사용자용) -->
-    <div class="modal" id="viewModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>항목 조회</h2>
-                <button class="close-btn" onclick="closeViewModal()">×</button>
-            </div>
-            <div class="permission-notice">
-                🔒 일반 사용자는 조회만 가능합니다
-            </div>
-            <div class="form-group">
-                <label>발란 이름</label>
-                <input type="text" id="viewName" disabled>
-            </div>
-            <div class="form-group">
-                <label>비밀</label>
-                <input type="text" id="viewPassword" disabled>
-            </div>
-            <div class="form-group">
-                <label>주소</label>
-                <input type="text" id="viewAddress" disabled>
-            </div>
-            <button class="btn btn-cancel" onclick="closeViewModal()" style="width: 100%; margin-top: 20px;">닫기</button>
-        </div>
-    </div>
-
-    <!-- 관리자 패널 모달 -->
-    <div class="modal" id="adminModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>사용자 비밀번호 관리</h2>
-                <button class="close-btn" onclick="closeAdminPanel()">×</button>
-            </div>
-
-            <div class="form-group">
-                <label>새 사용자 추가</label>
-                <input type="text" id="newUserName" placeholder="사용자 이름">
-            </div>
-            <div class="form-group">
-                <label>비밀번호</label>
-                <input type="text" id="newUserPassword" placeholder="비밀번호">
-            </div>
-            <button class="btn btn-save" onclick="addUser()" style="width: 100%; margin-bottom: 30px;">
-                사용자 추가
+        <div class="input-row">
+          <label class="input-label" for="passwordInput">
+            <span>비밀번호</span>
+            <small>숫자 4자리 이상 추천</small>
+          </label>
+          <div class="password-input-wrap">
+            <input
+              type="password"
+              id="passwordInput"
+              class="input-field"
+              placeholder="예: 2580"
+            />
+            <button
+              id="togglePasswordVisibility"
+              type="button"
+              class="toggle-visibility-btn"
+              aria-label="비밀번호 보기/숨기기 전환"
+            >
+              👁️
             </button>
-
-            <h3 style="margin-bottom: 15px; font-size: 18px;">등록된 사용자</h3>
-            <div class="user-list" id="userList"></div>
+          </div>
+          <div class="helper-text">
+            <strong>Tip.</strong> 이 기기에서만 쓰는 간단한 암호를 정해 주세요. 저장된
+            암호는 브라우저에만 남습니다.
+          </div>
+          <div id="passwordError" class="error-text">
+            비밀번호가 올바르지 않습니다
+          </div>
         </div>
+
+        <button id="loginBtn" class="primary-button">
+          <span class="primary-button-icon">➡️</span>
+          로그인
+          <span class="primary-button-sub">현재 기기에만 로그인됩니다</span>
+        </button>
+      </div>
+
+      <div class="card logged-in-only hidden">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="toolbar-label">데이터 모드</div>
+            <div class="pill-group">
+              <button
+                id="myDataMode"
+                class="pill-button active"
+                type="button"
+              >
+                <span>👤</span>
+                내 항목
+              </button>
+              <button
+                id="allDataMode"
+                class="pill-button admin-only"
+                type="button"
+              >
+                <span>🗂️</span>
+                전체 보기
+              </button>
+            </div>
+          </div>
+          <button id="addEntryBtn" class="add-button" type="button">
+            <span>＋</span>
+            Add
+          </button>
+        </div>
+
+        <div class="hint">
+          <span>ℹ️</span>
+          <span class="admin-only">
+            일반 사용자는 항목 추가만 가능합니다. 수정/삭제는 관리자만
+            가능합니다.
+          </span>
+          <span class="non-admin-only">
+            이 기기에서만 보이는 내 암호창입니다.
+          </span>
+        </div>
+
+        <div class="table-wrapper">
+          <div class="table-header">
+            <span>빌라 이름</span>
+            <span>비밀 <small>(4자리 이상)</small></span>
+            <span>주소</span>
+            <span class="admin-only">소유자</span>
+          </div>
+          <div class="table-body" id="entriesList">
+            <div class="empty-state" id="emptyState">
+              <strong>저장된 비밀번호가 없습니다</strong>
+              <div>+ Add 버튼을 눌러 추가하세요</div>
+            </div>
+          </div>
+          <div class="table-footer">
+            <span>
+              <span class="selector-dot" id="sessionIndicator"></span>
+              이 기기에서만 저장됩니다
+            </span>
+            <span>
+              🧑 Users
+              <span id="userCount">0</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card logged-in-only hidden">
+        <div class="card-header-row">
+          <div>
+            <div class="card-title">
+              <span>👥</span>
+              사용자 관리
+            </div>
+            <div class="card-subtext">
+              이 브라우저에서 사용할 수 있는 사용자 목록입니다. 각 사용자는 자신이
+              등록한 항목만 관리할 수 있습니다.
+            </div>
+          </div>
+          <button id="logoutBtn" class="logout-pill" type="button">
+            <span>🚪</span>
+            로그아웃
+          </button>
+        </div>
+        <div class="user-card">
+          <span>
+            <strong>현재 사용자</strong>
+            <span id="currentUserLabel" class="badge-compact">
+              Guest
+            </span>
+          </span>
+          <span>
+            <strong>권한</strong>
+            <span class="badge-compact" id="roleBadge">
+              기본 사용자
+            </span>
+          </span>
+          <span>
+            <strong>세션</strong>
+            <span class="badge-compact">
+              이 브라우저에만 저장
+            </span>
+          </span>
+          <span>
+            <strong>상태</strong>
+            <span class="badge-compact">
+              활성
+            </span>
+          </span>
+        </div>
+      </div>
     </div>
 
-    <script>
-        let passwords = [];
-        let editingIndex = -1;
-        let isLoggedIn = false;
-        let isAdmin = false;
-        let users = [];
+    <div class="divider"></div>
 
-        // 관리자 비밀번호 (숨김)
-        const ADMIN_PASSWORD = '2143';
-        
-        // 기본 사용자 계정
-        const DEFAULT_USERS = [
-            { name: '사용자1', password: 'user1234' },
-            { name: '사용자2', password: 'user5678' }
-        ];
+    <div class="pane">
+      <div class="card logged-in-only hidden admin-only">
+        <div class="card-header-row">
+          <div>
+            <div class="card-title">
+              <span>🛠️</span>
+              관리자
+            </div>
+            <div class="card-subtext">
+              등록된 모든 항목과 사용자를 한눈에 관리합니다.
+            </div>
+          </div>
+          <span class="auth-badge">
+            <span></span>
+            Admin session
+          </span>
+        </div>
 
-        // 초기화
-        function init() {
-            loadUsers();
-            checkLoginStatus();
-        }
+        <div class="readonly-info">
+          <span>🔒</span>
+          <span>
+            일반 사용자는 조회만 가능합니다. 항목 변경과 삭제는 관리자 화면에서만
+            수행됩니다.
+          </span>
+        </div>
 
-        // 사용자 목록 로드
-        function loadUsers() {
-            const saved = localStorage.getItem('users');
-            if (saved) {
-                users = JSON.parse(saved);
-            } else {
-                users = DEFAULT_USERS;
-                saveUsers();
-            }
-        }
+        <div class="user-password-list">
+          <div class="user-password-header">
+            <div>
+              <div class="modal-section-title">
+                <span></span>
+                사용자 비밀번호 관리
+              </div>
+            </div>
+            <div class="password-count">
+              <span></span>
+              등록된 사용자
+              <strong id="adminUserCount">0</strong>
+            </div>
+          </div>
+          <div id="userPasswordList">
+            <div class="user-password-item">
+              <span>등록된 사용자가 없습니다</span>
+            </div>
+          </div>
+          <div class="user-password-tagline">
+            새 사용자를 추가하면 각자 비밀번호로 로그인할 수 있습니다.
+          </div>
+          <button
+            id="addUserBtn"
+            class="secondary-button"
+            type="button"
+            style="margin-top: 0.45rem"
+          >
+            <span>➕</span>
+            새 사용자 추가
+          </button>
+        </div>
+      </div>
 
-        // 사용자 목록 저장
-        function saveUsers() {
-            localStorage.setItem('users', JSON.stringify(users));
-        }
+      <div class="card">
+        <div class="card-header-row">
+          <div>
+            <div class="card-title">
+              <span>ℹ️</span>
+              사용 방법
+            </div>
+            <div class="card-subtext">
+              이 페이지는 브라우저 안에서만 동작하는 작은 비밀 노트입니다.
+            </div>
+          </div>
+        </div>
+        <ul style="margin: 0.35rem 0 0.1rem; padding-left: 1.1rem; font-size: 0.8rem; color: var(--muted); line-height: 1.5;">
+          <li>비밀번호와 주소를 안전하게 저장하고 관리합니다.</li>
+          <li>데이터는 <strong>서버에 전혀 전송되지 않고</strong> 이 기기 안에만 저장됩니다.</li>
+          <li>브라우저를 변경하거나 캐시를 삭제하면 데이터가 사라질 수 있습니다.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
-        // 로그인 상태 확인
-        function checkLoginStatus() {
-            const loginStatus = sessionStorage.getItem('isLoggedIn');
-            const adminStatus = sessionStorage.getItem('isAdmin');
-            
-            if (loginStatus === 'true') {
-                isLoggedIn = true;
-                isAdmin = adminStatus === 'true';
-                showMainApp();
-            } else {
-                showLoginScreen();
-            }
-        }
+  <div class="modal-overlay" id="entryModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title-block">
+          <div class="modal-title">
+            새 항목 추가
+            <span class="modal-chip">
+              <span></span>
+              이 기기에만 저장
+            </span>
+          </div>
+          <div class="modal-subtitle">
+            간단한 메모처럼 빌라 이름, 비밀번호, 주소를 적어두세요. 편집은 관리자만
+            가능합니다.
+          </div>
+        </div>
+        <button
+          class="modal-close"
+          id="closeEntryModalBtn"
+          type="button"
+        >
+          <span>✕</span>
+          닫기
+        </button>
+      </div>
 
-        // 로그인
-        function login(event) {
-            event.preventDefault();
-            const password = document.getElementById('loginPassword').value;
-            const errorMsg = document.getElementById('errorMessage');
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div>
+            <div class="modal-section-title">
+              <span></span>
+              기본 정보
+            </div>
+            <div class="modal-form-group">
+              <label class="modal-label" for="modalName">
+                <span>빌라 이름</span>
+                <small>필수</small>
+              </label>
+              <input
+                type="text"
+                id="modalName"
+                class="modal-input"
+                placeholder="예: 블루힐 101동 302호"
+              />
 
-            // 관리자 체크
-            if (password === ADMIN_PASSWORD) {
-                isLoggedIn = true;
-                isAdmin = true;
-                sessionStorage.setItem('isLoggedIn', 'true');
-                sessionStorage.setItem('isAdmin', 'true');
-                showMainApp();
-                return;
-            }
+              <label class="modal-label" for="modalPassword">
+                <span>비밀</span>
+                <small>숫자 4자리 이상</small>
+              </label>
+              <input
+                type="text"
+                id="modalPassword"
+                class="modal-input"
+                placeholder="예: 2580"
+              />
+            </div>
+          </div>
 
-            // 일반 사용자 체크
-            const user = users.find(u => u.password === password);
-            if (user) {
-                isLoggedIn = true;
-                isAdmin = false;
-                sessionStorage.setItem('isLoggedIn', 'true');
-                sessionStorage.setItem('isAdmin', 'false');
-                showMainApp();
-                return;
-            }
+          <div>
+            <div class="modal-section-title">
+              <span></span>
+              주소 정보
+            </div>
+            <div class="modal-form-group">
+              <label class="modal-label" for="modalAddress">
+                <span>주소</span>
+                <small>선택</small>
+              </label>
+              <textarea
+                id="modalAddress"
+                class="modal-input"
+                placeholder="예: 울산광역시 남구 ○○동 ○○빌라 302호"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            // 로그인 실패
-            errorMsg.classList.add('show');
-            document.getElementById('loginPassword').value = '';
-            setTimeout(() => {
-                errorMsg.classList.remove('show');
-            }, 3000);
-        }
+      <div class="modal-footer">
+        <div class="modal-footer-left">
+          <button
+            class="secondary-button danger admin-only"
+            id="deleteEntryBtn"
+            type="button"
+          >
+            <span>🗑️</span>
+            삭제
+          </button>
+          <button
+            class="secondary-button"
+            id="cancelEntryBtn"
+            type="button"
+          >
+            <span>↩️</span>
+            취소
+          </button>
+        </div>
+        <button
+          class="modal-primary"
+          id="saveEntryBtn"
+          type="button"
+        >
+          <span>💾</span>
+          저장
+        </button>
+      </div>
+    </div>
+  </div>
 
-        // 로그아웃
-        function logout() {
-            if (confirm('로그아웃 하시겠습니까?')) {
-                isLoggedIn = false;
-                isAdmin = false;
-                sessionStorage.removeItem('isLoggedIn');
-                sessionStorage.removeItem('isAdmin');
-                showLoginScreen();
-            }
-        }
+  <div class="view-modal-overlay" id="viewModalOverlay">
+    <div class="view-modal">
+      <div class="view-modal-header">
+        <div>
+          <div class="view-modal-title">
+            항목 조회
+            <span class="view-modal-chip">
+              <span>🔒</span>
+              일반 사용자는 조회만 가능합니다
+            </span>
+          </div>
+          <div class="view-modal-subtitle">
+            저장된 내용을 그대로 확인할 수 있습니다. 편집이 필요하면 관리자에게
+            요청하세요.
+          </div>
+        </div>
+        <button
+          class="modal-close"
+          id="closeViewModalBtn"
+          type="button"
+        >
+          <span>✕</span>
+          닫기
+        </button>
+      </div>
 
-        // 로그인 화면 표시
-        function showLoginScreen() {
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('mainApp').classList.remove('active');
-            document.getElementById('loginPassword').value = '';
-        }
+      <div class="view-modal-body">
+        <div class="view-field">
+          <div class="view-label">빌라 이름</div>
+          <div class="view-value" id="viewName"></div>
+        </div>
+        <div class="view-field">
+          <div class="view-label">비밀</div>
+          <div class="view-value" id="viewPassword"></div>
+        </div>
+        <div class="view-field">
+          <div class="view-label">주소</div>
+          <div class="view-value" id="viewAddress"></div>
+        </div>
+      </div>
 
-        // 메인 앱 화면 표시
-        function showMainApp() {
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('mainApp').classList.add('active');
-            
-            // 관리자 버튼 표시
+      <div class="view-footer">
+        <span>
+          📄
+          <span id="viewMeta"></span>
+        </span>
+        <span>
+          <span class="selector-dot active"></span>
+          이 기기에서만 조회 가능합니다
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="userModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title-block">
+          <div class="modal-title">
+            사용자 비밀번호 관리
+            <span class="modal-chip">
+              <span></span>
+              Admin only
+            </span>
+          </div>
+          <div class="modal-subtitle">
+            새 사용자를 추가하거나 기존 사용자의 비밀번호를 수정할 수 있습니다.
+          </div>
+        </div>
+        <button
+          class="modal-close"
+          id="closeUserModalBtn"
+          type="button"
+        >
+          <span>✕</span>
+          닫기
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-form-group">
+          <label class="modal-label" for="userNameInput">
+            <span>사용자 이름</span>
+            <small>필수</small>
+          </label>
+          <input
+            type="text"
+            id="userNameInput"
+            class="modal-input"
+            placeholder="예: rider01"
+          />
+
+          <label class="modal-label" for="userPasswordInput">
+            <span>비밀번호</span>
+            <small>숫자 4자리 이상</small>
+          </label>
+          <input
+            type="password"
+            id="userPasswordInput"
+            class="modal-input"
+            placeholder="예: 2580"
+          />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="modal-footer-left">
+          <button
+            class="secondary-button danger"
+            id="deleteUserBtn"
+            type="button"
+          >
+            <span>🗑️</span>
+            사용자 삭제
+          </button>
+        </div>
+        <button
+          class="modal-primary"
+          id="saveUserBtn"
+          type="button"
+        >
+          <span>💾</span>
+          저장
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <div class="toast-icon">✅</div>
+    <div class="toast-message">
+      <strong>완료</strong>
+      <span id="toastMessage">변경 사항이 저장되었습니다.</span>
+    </div>
+    <button class="toast-close" id="toastCloseBtn" type="button">✕</button>
+  </div>
+
+  <script>
+    const passwordInput = document.getElementById("passwordInput");
+    const loginBtn = document.getElementById("loginBtn");
+    const passwordError = document.getElementById("passwordError");
+    const loginCard = document.getElementById("loginCard");
+    const loggedInElements = document.querySelectorAll(".logged-in-only");
+    const loginOnlyElements = document.querySelectorAll(".login-only");
+    const entriesList = document.getElementById("entriesList");
+    const emptyState = document.getElementById("emptyState");
+    const userCountSpan = document.getElementById("userCount");
+    const adminUserCount = document.getElementById("adminUserCount");
+    const userPasswordList = document.getElementById("userPasswordList");
+    const currentUserLabel = document.getElementById("currentUserLabel");
+    const roleBadge = document.getElementById("roleBadge");
+    const addEntryBtn = document.getElementById("addEntryBtn");
+    const entryModalOverlay = document.getElementById("entryModalOverlay");
+    const closeEntryModalBtn = document.getElementById("closeEntryModalBtn");
+    const cancelEntryBtn = document.getElementById("cancelEntryBtn");
+    const saveEntryBtn = document.getElementById("saveEntryBtn");
+    const modalName = document.getElementById("modalName");
+    const modalPassword = document.getElementById("modalPassword");
+    const modalAddress = document.getElementById("modalAddress");
+    const deleteEntryBtn = document.getElementById("deleteEntryBtn");
+    const myDataMode = document.getElementById("myDataMode");
+    const allDataMode = document.getElementById("allDataMode");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const sessionIndicator = document.getElementById("sessionIndicator");
+    const addUserBtn = document.getElementById("addUserBtn");
+    const userModalOverlay = document.getElementById("userModalOverlay");
+    const closeUserModalBtn = document.getElementById("closeUserModalBtn");
+    const userNameInput = document.getElementById("userNameInput");
+    const userPasswordInput = document.getElementById("userPasswordInput");
+    const saveUserBtn = document.getElementById("saveUserBtn");
+    const deleteUserBtn = document.getElementById("deleteUserBtn");
+    const viewModalOverlay = document.getElementById("viewModalOverlay");
+    const closeViewModalBtn = document.getElementById("closeViewModalBtn");
+    const viewName = document.getElementById("viewName");
+    const viewPassword = document.getElementById("viewPassword");
+    const viewAddress = document.getElementById("viewAddress");
+    const viewMeta = document.getElementById("viewMeta");
+    const toast = document.getElementById("toast");
+    const toastMessage = document.getElementById("toastMessage");
+    const toastCloseBtn = document.getElementById("toastCloseBtn");
+    const togglePasswordVisibility = document.getElementById("togglePasswordVisibility");
+
+    let currentUser = null;
+    let isAdmin = false;
+    let editingEntryId = null;
+    let editingUserName = null;
+    let viewAllData = false;
+
+    const STORAGE_KEYS = {
+      USERS: "secretVaultUsers_v1",
+      CURRENT_USER: "secretVaultCurrentUser_v1",
+      ENTRIES: "secretVaultEntries_v1",
+    };
+
+    function showToast(message) {
+      toastMessage.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => {
+        toast.classList.remove("visible");
+      }, 3000);
+    }
+
+    toastCloseBtn.addEventListener("click", () => {
+      toast.classList.remove("visible");
+    });
+
+    function saveUsers(users) {
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+      renderUsers();
+    }
+
+    function loadUsers() {
+      const data = localStorage.getItem(STORAGE_KEYS.USERS);
+      if (!data) return {};
+      try {
+        return JSON.parse(data);
+      } catch {
+        return {};
+      }
+    }
+
+    function saveCurrentUser(userName) {
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, userName);
+    }
+
+    function loadCurrentUser() {
+      return localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+    }
+
+    function saveEntries(entries) {
+      localStorage.setItem(STORAGE_KEYS.ENTRIES, JSON.stringify(entries));
+      renderEntries();
+    }
+
+    function loadEntries() {
+      const data = localStorage.getItem(STORAGE_KEYS.ENTRIES);
+      if (!data) return {};
+      try {
+        return JSON.parse(data);
+      } catch {
+        return {};
+      }
+    }
+
+    function ensureAdminUser() {
+      const users = loadUsers();
+      if (!users["admin"]) {
+        users["admin"] = {
+          password: "0000",
+          role: "admin",
+          createdAt: new Date().toISOString(),
+        };
+        saveUsers(users);
+        showToast("기본 관리자 계정(admin/0000)이 생성되었습니다.");
+      }
+    }
+
+    function renderUsers() {
+      const users = loadUsers();
+      const names = Object.keys(users);
+      userCountSpan.textContent = names.length;
+      adminUserCount.textContent = names.length;
+
+      if (names.length === 0) {
+        userPasswordList.innerHTML =
+          '<div class="user-password-item"><span>등록된 사용자가 없습니다</span></div>';
+        return;
+      }
+
+      userPasswordList.innerHTML = "";
+      names.forEach((name) => {
+        const user = users[name];
+        const item = document.createElement("div");
+        item.className = "user-password-item";
+        item.innerHTML = `
+          <span>${name} (${user.role === "admin" ? "관리자" : "일반"})</span>
+          <span class="badge-compact">${user.password}</span>
+        `;
+        item.addEventListener("click", () => {
+          openUserModal(name);
+        });
+        userPasswordList.appendChild(item);
+      });
+    }
+
+    function renderEntries() {
+      const entries = loadEntries();
+      const userNames = Object.keys(entries);
+
+      entriesList.innerHTML = "";
+
+      let hasEntries = false;
+
+      userNames.forEach((userName) => {
+        const userEntries = entries[userName] || [];
+
+        userEntries.forEach((entry, idx) => {
+          if (!viewAllData && userName !== currentUser) return;
+
+          hasEntries = true;
+          const row = document.createElement("div");
+          row.className = "table-row";
+          row.innerHTML = `
+            <span>${entry.name || ""}</span>
+            <span>${entry.password || ""}</span>
+            <span>${entry.address || ""}</span>
+            <span class="admin-only">${userName}</span>
+          `;
+
+          row.addEventListener("click", () => {
             if (isAdmin) {
-                document.getElementById('adminBtn').style.display = 'flex';
-                document.getElementById('permissionNotice').style.display = 'none';
+              openEntryModal(entry, userName, idx);
             } else {
-                document.getElementById('adminBtn').style.display = 'none';
-                document.getElementById('permissionNotice').style.display = 'block';
+              openViewModal(entry, userName, idx);
             }
-            
-            loadPasswords();
-        }
+          });
 
-        // 관리자 패널 열기
-        function openAdminPanel() {
-            if (!isAdmin) return;
-            renderUserList();
-            document.getElementById('adminModal').classList.add('active');
-        }
-
-        // 관리자 패널 닫기
-        function closeAdminPanel() {
-            document.getElementById('adminModal').classList.remove('active');
-            document.getElementById('newUserName').value = '';
-            document.getElementById('newUserPassword').value = '';
-        }
-
-        // 사용자 목록 렌더링
-        function renderUserList() {
-            const userList = document.getElementById('userList');
-            userList.innerHTML = users.map((user, index) => `
-                <div class="user-item">
-                    <div class="user-info">
-                        <div class="user-name">${user.name}</div>
-                        <div class="user-password">비밀번호: ${user.password}</div>
-                    </div>
-                    <button class="delete-user-btn" onclick="deleteUser(${index})">삭제</button>
-                </div>
-            `).join('');
-        }
-
-        // 사용자 추가
-        function addUser() {
-            const name = document.getElementById('newUserName').value.trim();
-            const password = document.getElementById('newUserPassword').value.trim();
-
-            if (!name || !password) {
-                alert('이름과 비밀번호를 모두 입력해주세요.');
-                return;
-            }
-
-            if (password === ADMIN_PASSWORD) {
-                alert('관리자 비밀번호는 사용할 수 없습니다.');
-                return;
-            }
-
-            users.push({ name, password });
-            saveUsers();
-            renderUserList();
-            
-            document.getElementById('newUserName').value = '';
-            document.getElementById('newUserPassword').value = '';
-            
-            alert(`사용자 "${name}"이(가) 추가되었습니다.\n비밀번호: ${password}`);
-        }
-
-        // 사용자 삭제
-        function deleteUser(index) {
-            if (confirm(`"${users[index].name}" 사용자를 삭제하시겠습니까?`)) {
-                users.splice(index, 1);
-                saveUsers();
-                renderUserList();
-            }
-        }
-
-        // 비밀번호 데이터 로드
-        function loadPasswords() {
-            const saved = localStorage.getItem('passwords');
-            if (saved) {
-                passwords = JSON.parse(saved);
-            } else {
-                passwords = [
-                    {"name": "west51", "password": "종3572", "address": "서부2길 14-2"},
-                    {"name": "가온아트빌", "password": "#2157#", "address": "동향교1길 27-16"},
-                    {"name": "강변파크빌", "password": "405#1234#t", "address": "남천로 174"},
-                    {"name": "갤럭시 진", "password": "종1223", "address": "동향교1길 16-8"},
-                    {"name": "경동빌", "password": "#2016#", "address": "동향교1길 16-17"},
-                    {"name": "경은하우스", "password": "#1001#", "address": "방천3길 11"},
-                    {"name": "골든네스트", "password": "종7247", "address": "남상평2길 35"},
-                    {"name": "금빛마을", "password": "#6565#", "address": "동부1길 26-3"},
-                    {"name": "나이스빌", "password": "#1907#", "address": "북문8길 16"},
-                    {"name": "노블하우스", "password": "종3142", "address": "웃방천3길 3"},
-                    {"name": "녹원캐슬", "password": "#2358#", "address": "북문8길 64"},
-                    {"name": "다드림", "password": "#7981#", "address": "동향교2길 9"},
-                    {"name": "다솜원룸", "password": "종2536", "address": "방천3길 11-10"},
-                    {"name": "다인빌리지", "password": "#6745#", "address": "서향교1길 27-10"},
-                    {"name": "동문빌", "password": "#7777#", "address": "서문3길 14-1"},
-                    {"name": "동부그린힐", "password": "10#9999#", "address": "동부4길 7-3"},
-                    {"name": "드림빌", "password": "종1604", "address": "서향교1길 73-14"},
-                    {"name": "레나빌", "password": "#3355#", "address": "북문3길 5-15"},
-                    {"name": "레이크 하우스", "password": "종1920", "address": "남상평1길 28-9"},
-                    {"name": "르비딤B빌", "password": "종7375", "address": "남상평2길 12-7"},
-                    {"name": "리치빌", "password": "#9988#", "address": "동향교3길 29"},
-                    {"name": "린파크뷰", "password": "#4455#", "address": "서향교1길 9-4"},
-                    {"name": "마이빌", "password": "종3572", "address": "방천3길 7-7"},
-                    {"name": "메이져빌", "password": "#7511#", "address": "서향교1길46"},
-                    {"name": "목화방", "password": "#4377#", "address": "서문2길 16"},
-                    {"name": "목화하우스A동", "password": "#7777#", "address": "방천7길 20"},
-                    {"name": "목화하우스B동", "password": "#7777#", "address": "방천5길 17-1"},
-                    {"name": "무궁화빌", "password": "종9342", "address": "동부2길 35"},
-                    {"name": "미성빌", "password": "1357#", "address": "남상평2길 12-15"},
-                    {"name": "백산아트빌", "password": "#1234#", "address": "서상평길 9-9"},
-                    {"name": "별하우스", "password": "열쇠1235열쇠", "address": "남상평3길 15-2"},
-                    {"name": "복돼지3차", "password": "#1234#", "address": "남천로 182"},
-                    {"name": "서문빌", "password": "#1111#", "address": "서문3길 14"},
-                    {"name": "서부목화빌", "password": "#7777#", "address": "방천 3길 5-2"},
-                    {"name": "서원빌", "password": "#5678#", "address": "서향교1길 27-2"},
-                    {"name": "성우빌라 B동 1,2,3라인", "password": "36551*", "address": "북문3길 23-3"},
-                    {"name": "세경빌", "password": "종9181", "address": "서향교1길 15-4"},
-                    {"name": "세경하우스", "password": "종9181", "address": "동향교3길 23-1"},
-                    {"name": "세홈원룸", "password": "#1231#", "address": "동부9길 13-3"},
-                    {"name": "소슬채아파트", "password": "종6530", "address": "교동로 29"},
-                    {"name": "스타골든캐슬", "password": "종3788", "address": "구교동길 20"},
-                    {"name": "신한빌리지", "password": "7890#", "address": "웃방천3길 17"},
-                    {"name": "아펠바움", "password": "종7016", "address": "서상평길 23-13"},
-                    {"name": "에코하우스", "password": "종2580", "address": "남상평2길 34-9"},
-                    {"name": "에코하우스", "password": "#2014#", "address": "동향교3길 31-5"},
-                    {"name": "엘파크", "password": "#9999#", "address": "남상평2길 31"},
-                    {"name": "옛살비하우스", "password": "#1234#", "address": "서문3길 18"},
-                    {"name": "온누리", "password": "2550#", "address": "서향교1길 15-5"},
-                    {"name": "우성스카이빌", "password": "#6249#", "address": "동향교2길 5-11"},
-                    {"name": "우성포시즌", "password": "종1288", "address": "상평1길 10"},
-                    {"name": "우주파크", "password": "#8888#", "address": "교동로 39"},
-                    {"name": "월드빌", "password": "#0308#", "address": "동향교3길 32-4"},
-                    {"name": "유진빌", "password": "#2406#", "address": "서향교1길 21-10"},
-                    {"name": "윤정빌", "password": "8585#", "address": "동향교2길 18-11"},
-                    {"name": "이지스타운", "password": "#3844#", "address": "교동로 34"},
-                    {"name": "재경빌", "password": "종1663", "address": "반구대로 860-9"},
-                    {"name": "지프하우스", "password": "종6429", "address": "동향교4길 17"},
-                    {"name": "천지아파트", "password": "종1234", "address": "동부9길 5"},
-                    {"name": "캐슬하우스", "password": "#8989#", "address": "북문2길 15"},
-                    {"name": "클래식 타운캐슬", "password": "#7063#", "address": "서향교1길 27-7"},
-                    {"name": "토마스빌", "password": "#7777#", "address": "서향교1길 72-1"},
-                    {"name": "토미하우스", "password": "문1234", "address": "동향교3길 28"},
-                    {"name": "파크빌A", "password": "#3904#", "address": "북문2길 17"},
-                    {"name": "풀하우스2", "password": "#9999#", "address": "북문1길 5-4"},
-                    {"name": "하이야트A동", "password": "#2346#", "address": "방천2길 22"},
-                    {"name": "한라빌리지", "password": "1024", "address": "헌양길 189"},
-                    {"name": "한영빌", "password": "종9181", "address": "서향교1길 15-6"},
-                    {"name": "해오름", "password": "#2018#", "address": "동부6길 7"},
-                    {"name": "해피룸 3차", "password": "#2569#", "address": "방천3길 15-5"},
-                    {"name": "행복이 가득한집", "password": "종1234", "address": "서향교1길 31-8"},
-                    {"name": "현대빌리지", "password": "#9373#", "address": "서상평길 25"},
-                    {"name": "홍희좋은빌", "password": "종0079", "address": "방천3길 15"},
-                    {"name": "효염빌리지", "password": "손 1234#", "address": "웃방천3길 21"},
-                    {"name": "히트하우스", "password": "#5829#", "address": "동향교2길 19"},
-                    {"name": "힐링하우스", "password": "종8271", "address": "남천로 144"}
-                ];
-                saveToStorage();
-            }
-            renderPasswords();
-        }
-
-        function saveToStorage() {
-            localStorage.setItem('passwords', JSON.stringify(passwords));
-        }
-
-        function renderPasswords(filteredData = null) {
-            const data = filteredData || passwords;
-            const listDiv = document.getElementById('passwordList');
-            const emptyState = document.getElementById('emptyState');
-            
-            if (data.length === 0) {
-                listDiv.innerHTML = '';
-                emptyState.style.display = 'block';
-                return;
-            }
-
-            emptyState.style.display = 'none';
-            
-            // 관리자는 클릭 가능, 일반 사용자는 조회만 가능
-            if (isAdmin) {
-                listDiv.innerHTML = data.map((item, index) => `
-                    <div class="table-row clickable" onclick="openEditModal(${passwords.indexOf(item)})">
-                        <div class="row-number">${passwords.indexOf(item) + 1}</div>
-                        <div class="row-content">${item.name}</div>
-                        <div class="row-content">${item.password}</div>
-                        <div class="row-content">${item.address}</div>
-                    </div>
-                `).join('');
-            } else {
-                listDiv.innerHTML = data.map((item, index) => `
-                    <div class="table-row clickable" onclick="openViewModal(${passwords.indexOf(item)})">
-                        <div class="row-number">${passwords.indexOf(item) + 1}</div>
-                        <div class="row-content">${item.name}</div>
-                        <div class="row-content">${item.password}</div>
-                        <div class="row-content">${item.address}</div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function searchPasswords() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            if (searchTerm === '') {
-                renderPasswords();
-                return;
-            }
-
-            const filtered = passwords.filter(item => 
-                item.name.toLowerCase().includes(searchTerm) ||
-                item.password.toLowerCase().includes(searchTerm) ||
-                item.address.toLowerCase().includes(searchTerm)
-            );
-            renderPasswords(filtered);
-        }
-
-        function openAddModal() {
-            editingIndex = -1;
-            document.getElementById('modalTitle').textContent = '새 항목 추가';
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemPassword').value = '';
-            document.getElementById('itemAddress').value = '';
-            document.getElementById('deleteBtn').style.display = 'none';
-            document.getElementById('passwordModal').classList.add('active');
-        }
-
-        // 관리자 전용 - 수정 모달
-        function openEditModal(index) {
-            if (!isAdmin) {
-                openViewModal(index);
-                return;
-            }
-            
-            editingIndex = index;
-            const item = passwords[index];
-            document.getElementById('modalTitle').textContent = '항목 수정';
-            document.getElementById('itemName').value = item.name;
-            document.getElementById('itemPassword').value = item.password;
-            document.getElementById('itemAddress').value = item.address;
-            document.getElementById('deleteBtn').style.display = 'block';
-            document.getElementById('passwordModal').classList.add('active');
-        }
-
-        // 일반 사용자용 - 조회 전용 모달
-        function openViewModal(index) {
-            const item = passwords[index];
-            document.getElementById('viewName').value = item.name;
-            document.getElementById('viewPassword').value = item.password;
-            document.getElementById('viewAddress').value = item.address;
-            document.getElementById('viewModal').classList.add('active');
-        }
-
-        function closeViewModal() {
-            document.getElementById('viewModal').classList.remove('active');
-        }
-
-        function closeModal() {
-            document.getElementById('passwordModal').classList.remove('active');
-        }
-
-        function savePassword(event) {
-            event.preventDefault();
-            
-            const newItem = {
-                name: document.getElementById('itemName').value,
-                password: document.getElementById('itemPassword').value,
-                address: document.getElementById('itemAddress').value
-            };
-
-            if (editingIndex === -1) {
-                // 새 항목 추가 - 모든 사용자 가능
-                passwords.push(newItem);
-            } else {
-                // 수정 - 관리자만 가능
-                if (!isAdmin) {
-                    alert('수정 권한이 없습니다.');
-                    closeModal();
-                    return;
-                }
-                passwords[editingIndex] = newItem;
-            }
-
-            saveToStorage();
-            renderPasswords();
-            closeModal();
-        }
-
-        function deletePassword() {
-            // 삭제 - 관리자만 가능
-            if (!isAdmin) {
-                alert('삭제 권한이 없습니다.');
-                return;
-            }
-            
-            if (editingIndex !== -1 && confirm('정말 삭제하시겠습니까?')) {
-                passwords.splice(editingIndex, 1);
-                saveToStorage();
-                renderPasswords();
-                closeModal();
-            }
-        }
-
-        // 모달 외부 클릭 시 닫기
-        document.getElementById('passwordModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
+          entriesList.appendChild(row);
         });
+      });
 
-        document.getElementById('viewModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeViewModal();
-            }
-        });
+      if (!hasEntries) {
+        entriesList.appendChild(emptyState);
+        emptyState.style.display = "block";
+      } else {
+        emptyState.style.display = "none";
+      }
 
-        document.getElementById('adminModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeAdminPanel();
-            }
-        });
+      toggleAdminElements();
+    }
 
-        // 초기화
-        init();
-    </script>
+    function updateUserUI() {
+      if (!currentUser) return;
+
+      currentUserLabel.textContent = currentUser === "admin" ? "관리자(admin)" : currentUser;
+      isAdmin = currentUser === "admin";
+
+      roleBadge.textContent = isAdmin ? "관리자" : "기본 사용자";
+
+      if (isAdmin) {
+        sessionIndicator.classList.add("active");
+      } else {
+        sessionIndicator.classList.remove("active");
+      }
+
+      toggleAdminElements();
+      renderEntries();
+    }
+
+    function toggleAdminElements() {
+      const adminOnlyElements = document.querySelectorAll(".admin-only");
+      const nonAdminOnlyElements = document.querySelectorAll(".non-admin-only");
+
+      adminOnlyElements.forEach((el) => {
+        el.style.display = isAdmin ? (el.tagName === "BUTTON" ? "inline-flex" : "block") : "none";
+      });
+
+      nonAdminOnlyElements.forEach((el) => {
+        el.style.display = isAdmin ? "none" : "inline";
+      });
+
+      if (!isAdmin) {
+        viewAllData = false;
+        myDataMode.classList.add("active");
+        allDataMode.classList.remove("active");
+      }
+    }
+
+    function doLogin(password) {
+      const users = loadUsers();
+      const names = Object.keys(users);
+
+      for (const name of names) {
+        if (users[name].password === password) {
+          currentUser = name;
+          saveCurrentUser(name);
+          loginCard.classList.add("hidden");
+          loggedInElements.forEach((el) => el.classList.remove("hidden"));
+          loginOnlyElements.forEach((el) => el.classList.add("hidden"));
+          passwordError.classList.remove("visible");
+          passwordInput.value = "";
+          updateUserUI();
+          showToast(currentUser + "님, 환영합니다.");
+          return true;
+        }
+      }
+
+      passwordError.classList.add("visible");
+      return false;
+    }
+
+    function openEntryModal(entry = null, ownerName = null, index = null) {
+      entryModalOverlay.classList.add("visible");
+      if (entry) {
+        modalName.value = entry.name || "";
+        modalPassword.value = entry.password || "";
+        modalAddress.value = entry.address || "";
+        editingEntryId = { ownerName, index };
+        deleteEntryBtn.style.display = isAdmin ? "inline-flex" : "none";
+      } else {
+        modalName.value = "";
+        modalPassword.value = "";
+        modalAddress.value = "";
+        editingEntryId = null;
+        deleteEntryBtn.style.display = "none";
+      }
+    }
+
+    function closeEntryModal() {
+      entryModalOverlay.classList.remove("visible");
+    }
+
+    function openViewModal(entry, ownerName, index) {
+      viewName.textContent = entry.name || "";
+      viewPassword.textContent = entry.password || "";
+      viewAddress.textContent = entry.address || "";
+      viewMeta.textContent = `소유자: ${
+        ownerName === "admin" ? "관리자" : ownerName
+      } · #${index + 1}`;
+      viewModalOverlay.classList.add("visible");
+    }
+
+    function closeViewModal() {
+      viewModalOverlay.classList.remove("visible");
+    }
+
+    function saveEntry() {
+      const name = modalName.value.trim();
+      const password = modalPassword.value.trim();
+      const address = modalAddress.value.trim();
+
+      if (!name || !password) {
+        showToast("빌라 이름과 비밀번호는 필수입니다.");
+        return;
+      }
+
+      const entries = loadEntries();
+
+      if (!entries[currentUser]) {
+        entries[currentUser] = [];
+      }
+
+      if (editingEntryId) {
+        const { ownerName, index } = editingEntryId;
+        if (!entries[ownerName]) {
+          entries[ownerName] = [];
+        }
+        entries[ownerName][index] = { name, password, address };
+      } else {
+        entries[currentUser].push({ name, password, address });
+      }
+
+      saveEntries(entries);
+      closeEntryModal();
+      showToast("항목이 저장되었습니다.");
+    }
+
+    function deleteEntry() {
+      if (!editingEntryId || !isAdmin) return;
+
+      const { ownerName, index } = editingEntryId;
+      const entries = loadEntries();
+
+      if (!entries[ownerName]) return;
+
+      entries[ownerName].splice(index, 1);
+      if (entries[ownerName].length === 0) {
+        delete entries[ownerName];
+      }
+
+      saveEntries(entries);
+      closeEntryModal();
+      showToast("항목이 삭제되었습니다.");
+    }
+
+    function openUserModal(name = null) {
+      userModalOverlay.classList.add("visible");
+      if (name) {
+        const users = loadUsers();
+        const user = users[name];
+        userNameInput.value = name;
+        userPasswordInput.value = user.password || "";
+        editingUserName = name;
+        deleteUserBtn.style.display = "inline-flex";
+      } else {
+        userNameInput.value = "";
+        userPasswordInput.value = "";
+        editingUserName = null;
+        deleteUserBtn.style.display = "none";
+      }
+    }
+
+    function closeUserModal() {
+      userModalOverlay.classList.remove("visible");
+    }
+
+    function saveUser() {
+      const name = userNameInput.value.trim();
+      const password = userPasswordInput.value.trim();
+
+      if (!name || !password) {
+        showToast("사용자 이름과 비밀번호는 필수입니다.");
+        return;
+      }
+
+      const users = loadUsers();
+
+      if (editingUserName && editingUserName !== name) {
+        delete users[editingUserName];
+      }
+
+      if (!users[name]) {
+        users[name] = {
+          createdAt: new Date().toISOString(),
+        };
+      }
+
+      users[name].password = password;
+
+      if (!users[name].role) {
+        users[name].role = name === "admin" ? "admin" : "user";
+      }
+
+      saveUsers(users);
+      closeUserModal();
+      showToast("사용자 정보가 저장되었습니다.");
+    }
+
+    function deleteUser() {
+      if (!editingUserName) return;
+      const users = loadUsers();
+
+      if (editingUserName === "admin") {
+        showToast("관리자 계정은 삭제할 수 없습니다.");
+        return;
+      }
+
+      delete users[editingUserName];
+      saveUsers(users);
+      closeUserModal();
+      showToast("사용자가 삭제되었습니다.");
+    }
+
+    function logout() {
+      currentUser = null;
+      isAdmin = false;
+      viewAllData = false;
+      myDataMode.classList.add("active");
+      allDataMode.classList.remove("active");
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+      loginCard.classList.remove("hidden");
+      loggedInElements.forEach((el) => el.classList.add("hidden"));
+      loginOnlyElements.forEach((el) => el.classList.remove("hidden"));
+      renderEntries();
+      showToast("로그아웃되었습니다.");
+    }
+
+    loginBtn.addEventListener("click", () => {
+      const pwd = passwordInput.value.trim();
+      if (!pwd) {
+        passwordError.classList.add("visible");
+        return;
+      }
+      doLogin(pwd);
+    });
+
+    passwordInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        loginBtn.click();
+      }
+    });
+
+    addEntryBtn.addEventListener("click", () => openEntryModal());
+    closeEntryModalBtn.addEventListener("click", closeEntryModal);
+    cancelEntryBtn.addEventListener("click", closeEntryModal);
+    saveEntryBtn.addEventListener("click", saveEntry);
+    deleteEntryBtn.addEventListener("click", deleteEntry);
+
+    myDataMode.addEventListener("click", () => {
+      if (!currentUser) return;
+      viewAllData = false;
+      myDataMode.classList.add("active");
+      allDataMode.classList.remove("active");
+      renderEntries();
+    });
+
+    allDataMode.addEventListener("click", () => {
+      if (!currentUser || !isAdmin) return;
+      viewAllData = true;
+      myDataMode.classList.remove("active");
+      allDataMode.classList.add("active");
+      renderEntries();
+    });
+
+    logoutBtn.addEventListener("click", logout);
+
+    settingsBtn.addEventListener("click", () => {
+      showToast("관리자 설정은 우측 관리자 패널에서 가능합니다.");
+    });
+
+    addUserBtn.addEventListener("click", () => openUserModal());
+    closeUserModalBtn.addEventListener("click", closeUserModal);
+    saveUserBtn.addEventListener("click", saveUser);
+    deleteUserBtn.addEventListener("click", deleteUser);
+
+    closeViewModalBtn.addEventListener("click", closeViewModal);
+
+    viewModalOverlay.addEventListener("click", (e) => {
+      if (e.target === viewModalOverlay) {
+        closeViewModal();
+      }
+    });
+
+    entryModalOverlay.addEventListener("click", (e) => {
+      if (e.target === entryModalOverlay) {
+        closeEntryModal();
+      }
+    });
+
+    userModalOverlay.addEventListener("click", (e) => {
+      if (e.target === userModalOverlay) {
+        closeUserModal();
+      }
+    });
+
+    togglePasswordVisibility.addEventListener("click", () => {
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        togglePasswordVisibility.textContent = "🙈";
+      } else {
+        passwordInput.type = "password";
+        togglePasswordVisibility.textContent = "👁️";
+      }
+    });
+
+    function init() {
+      ensureAdminUser();
+      renderUsers();
+      renderEntries();
+
+      const lastUser = loadCurrentUser();
+      if (lastUser) {
+        const users = loadUsers();
+        if (users[lastUser]) {
+          currentUser = lastUser;
+          loginCard.classList.add("hidden");
+          loggedInElements.forEach((el) => el.classList.remove("hidden"));
+          loginOnlyElements.forEach((el) => el.classList.add("hidden"));
+          updateUserUI();
+          showToast(lastUser + "님, 다시 오셨네요.");
+        } else {
+          localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+        }
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
